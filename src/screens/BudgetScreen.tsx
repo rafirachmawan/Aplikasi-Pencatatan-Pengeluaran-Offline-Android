@@ -113,7 +113,7 @@ const BudgetScreen: React.FC = () => {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Text style={styles.backIcon}>←</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Amplop Digital</Text>
+          <Text style={styles.headerTitle}>Alokasi Dana</Text>
           <TouchableOpacity
             onPress={handleSave}
             style={[styles.saveBtn, saving && { opacity: 0.6 }]}

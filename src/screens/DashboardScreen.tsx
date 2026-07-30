@@ -175,16 +175,16 @@ const DashboardScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Amplop Digital Banner */}
+        {/* Budget Banner */}
         <TouchableOpacity
           style={styles.budgetBanner}
+          activeOpacity={0.8}
           onPress={() => navigation.navigate("Budget")}
-          activeOpacity={0.85}
         >
           <View style={styles.budgetBannerLeft}>
             <Text style={styles.budgetBannerEmoji}>🪙</Text>
             <View>
-              <Text style={styles.budgetBannerTitle}>Amplop Digital</Text>
+              <Text style={styles.budgetBannerTitle}>Alokasi Dana</Text>
               <Text style={styles.budgetBannerDesc}>
                 Atur alokasi gaji & anggaran bulanan
               </Text>
