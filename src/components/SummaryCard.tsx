@@ -19,7 +19,7 @@ const SummaryCard: React.FC<SummaryCardProps> = ({label, amount, type, hidden = 
   const icon = isIncome ? '↑' : '↓';
 
   return (
-    <View style={[styles.card, {borderLeftColor: accent}]}>
+    <View style={styles.card}>
       <View style={[styles.iconBadge, {backgroundColor: accent + '22'}]}>
         <Text style={[styles.iconText, {color: accent}]}>{icon}</Text>
       </View>
@@ -38,12 +38,10 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.bgCard,
-    borderRadius: Radius.md,
+    backgroundColor: Colors.bgCardElevated,
+    borderRadius: Radius.lg,
     padding: Spacing.md,
-    borderLeftWidth: 3,
     gap: Spacing.sm,
-    ...Shadow.card,
   },
   iconBadge: {
     width: 36,
@@ -54,7 +52,7 @@ const styles = StyleSheet.create({
   },
   iconText: {
     fontSize: Typography.lg,
-    fontWeight: Typography.weightBold,
+    fontFamily: Typography.fontBold,
   },
   info: {
     flex: 1,
@@ -62,12 +60,12 @@ const styles = StyleSheet.create({
   label: {
     fontSize: Typography.xs,
     color: Colors.textSecondary,
-    fontWeight: Typography.weightMedium,
+    fontFamily: Typography.fontMedium,
     marginBottom: 2,
   },
   amount: {
     fontSize: Typography.sm,
-    fontWeight: Typography.weightBold,
+    fontFamily: Typography.fontBold,
   },
 });
 

@@ -29,7 +29,7 @@ const App: React.FC = () => {
   if (!isReady) {
     return (
       <View style={{flex: 1, backgroundColor: Colors.bg, justifyContent: 'center', alignItems: 'center'}}>
-        <Text style={{color: Colors.textSecondary}}>Loading Database...</Text>
+        <Text style={{color: Colors.textSecondary}}>Loading...</Text>
       </View>
     );
   }

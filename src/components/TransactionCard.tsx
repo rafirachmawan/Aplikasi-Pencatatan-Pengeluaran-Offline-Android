@@ -86,12 +86,13 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.bgCard,
-    borderRadius: Radius.md,
+    backgroundColor: 'transparent',
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm + 2,
+    paddingVertical: Spacing.sm + 4,
     marginBottom: Spacing.xs,
-    gap: Spacing.sm,
+    gap: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
   },
   iconContainer: {
     width: 44,
@@ -109,11 +110,12 @@ const styles = StyleSheet.create({
   categoryName: {
     fontSize: Typography.base,
     color: Colors.textPrimary,
-    fontWeight: Typography.weightSemiBold,
+    fontFamily: Typography.fontSemiBold,
     marginBottom: 2,
   },
   walletName: {
     fontSize: Typography.sm,
+    fontFamily: Typography.fontRegular,
     color: Colors.textSecondary,
   },
   amountSection: {
@@ -121,11 +123,12 @@ const styles = StyleSheet.create({
   },
   amount: {
     fontSize: Typography.base,
-    fontWeight: Typography.weightBold,
+    fontFamily: Typography.fontSemiBold,
     marginBottom: 2,
   },
   date: {
     fontSize: Typography.xs,
+    fontFamily: Typography.fontRegular,
     color: Colors.textTertiary,
   },
 });

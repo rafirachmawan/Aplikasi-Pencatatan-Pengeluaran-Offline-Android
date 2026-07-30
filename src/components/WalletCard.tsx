@@ -20,7 +20,7 @@ const WalletCard: React.FC<WalletCardProps> = ({wallet, onPress, hidden}) => {
 
   return (
     <TouchableOpacity
-      style={[styles.card, {borderTopColor: color}]}
+      style={styles.card}
       activeOpacity={0.75}
       onPress={() => onPress?.(wallet)}>
       <View style={styles.top}>
@@ -45,38 +45,42 @@ const WalletCard: React.FC<WalletCardProps> = ({wallet, onPress, hidden}) => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: Colors.bgCard,
-    borderRadius: Radius.lg,
-    padding: Spacing.lg,
+    backgroundColor: Colors.bgCard, // Slightly off-white for contrast
+    borderRadius: Radius.md,
+    padding: Spacing.md,
     marginRight: Spacing.md,
-    width: 200,
-    borderTopWidth: 3,
+    width: 160,
+    borderWidth: 1,
+    borderColor: Colors.border,
     ...Shadow.card,
+    elevation: 2,
   },
   top: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.xs,
   },
   colorDot: {
-    width: 10,
-    height: 10,
+    width: 8,
+    height: 8,
     borderRadius: Radius.full,
   },
   name: {
-    fontSize: Typography.sm,
+    fontSize: Typography.xs,
     color: Colors.textSecondary,
-    fontWeight: Typography.weightMedium,
+    fontFamily: Typography.fontSemiBold,
     flex: 1,
   },
   balance: {
-    fontSize: Typography.xl,
-    fontWeight: Typography.weightExtraBold,
+    fontSize: Typography.lg,
+    fontFamily: Typography.fontBold,
     marginBottom: 4,
+    letterSpacing: -0.5,
   },
   initialLabel: {
-    fontSize: Typography.xs,
+    fontSize: 10,
+    fontFamily: Typography.fontRegular,
     color: Colors.textTertiary,
   },
 });

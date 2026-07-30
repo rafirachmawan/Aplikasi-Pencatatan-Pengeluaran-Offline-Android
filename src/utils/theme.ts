@@ -4,56 +4,63 @@
 
 export const Colors = {
   // Backgrounds
-  bg: '#0F0F14',
-  bgCard: '#1A1A24',
-  bgCardElevated: '#212130',
-  bgInput: '#13131C',
+  bg: '#FFFFFF',            // Clean White
+  bgCard: '#F8FAFC',        // Slate 50 for flat cards
+  bgCardElevated: '#FFFFFF',// White for elevated cards
+  bgInput: '#F1F5F9',       // Slate 100 for inputs
 
   // Brand / Primary
-  primary: '#818CF8',       // Indigo
-  primaryDark: '#6366F1',
-  primaryLight: '#A5B4FC',
+  primary: '#09090B',       // Black for primary actions/branding
+  primaryDark: '#27272A',
+  primaryLight: '#52525B',
 
-  // Semantic
-  income: '#4ADE80',        // Green
-  incomeLight: '#BBF7D0',
-  expense: '#F87171',       // Red
-  expenseLight: '#FECACA',
-  transfer: '#60A5FA',      // Blue
+  // Semantic (Desaturated & Elegant)
+  income: '#10B981',        // Emerald Green
+  incomeLight: '#D1FAE5',
+  expense: '#EF4444',       // Rose Red
+  expenseLight: '#FEE2E2',
+  transfer: '#3B82F6',      // Blue
 
   // Text
-  textPrimary: '#F1F5F9',
-  textSecondary: '#94A3B8',
-  textTertiary: '#64748B',
-  textDisabled: '#475569',
+  textPrimary: '#0F172A',   // Slate 900
+  textSecondary: '#64748B', // Slate 500
+  textTertiary: '#94A3B8',  // Slate 400
+  textDisabled: '#CBD5E1',  // Slate 300
 
   // Divider / Border
-  border: '#2D2D3D',
-  divider: '#1E1E2C',
+  border: '#E2E8F0',        // Slate 200
+  divider: '#F1F5F9',
 
-  // Chart colors (for pie chart slices)
+  // Chart colors (Premium Monochromatic & Muted)
   chartColors: [
-    '#818CF8', '#F87171', '#4ADE80', '#FBBF24',
-    '#60A5FA', '#F472B6', '#34D399', '#A78BFA',
-    '#FB923C', '#22D3EE',
+    '#0F172A', '#334155', '#64748B', '#94A3B8',
+    '#CBD5E1', '#10B981', '#3B82F6', '#6366F1',
+    '#F59E0B', '#EF4444',
   ],
 };
 
 export const Typography = {
-  xs: 11,
-  sm: 12,
-  base: 14,
-  md: 16,
-  lg: 18,
-  xl: 22,
-  '2xl': 26,
-  '3xl': 32,
+  xs: 12,
+  sm: 13,
+  base: 15,
+  md: 17,
+  lg: 19,
+  xl: 24,
+  '2xl': 28,
+  '3xl': 34,
 
   weightRegular: '400' as const,
   weightMedium: '500' as const,
   weightSemiBold: '600' as const,
   weightBold: '700' as const,
   weightExtraBold: '800' as const,
+
+  // Font families — Android system sans-serif (cleaner than default)
+  fontRegular: 'sans-serif',
+  fontMedium: 'sans-serif-medium',
+  fontSemiBold: 'sans-serif-medium',
+  fontBold: 'sans-serif-condensed',
+  fontExtraBold: 'sans-serif-condensed',
 };
 
 export const Spacing = {
@@ -71,23 +78,23 @@ export const Radius = {
   sm: 8,
   md: 12,
   lg: 16,
-  xl: 20,
+  xl: 24,
   full: 999,
 };
 
 export const Shadow = {
   card: {
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
     shadowRadius: 8,
-    elevation: 6,
+    elevation: 3,
   },
   elevated: {
-    shadowColor: '#818CF8',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 10,
   },
 };

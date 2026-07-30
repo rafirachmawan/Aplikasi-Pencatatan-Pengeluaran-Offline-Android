@@ -26,9 +26,8 @@ const COLOR_OPTIONS = ['#818CF8','#4ADE80','#F87171','#FBBF24','#60A5FA','#F472B
 
 const BudgetScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { wallets } = useWalletStore();
+  const { wallets, totalBalance } = useWalletStore();
 
-  const [selectedWalletId, setSelectedWalletId] = useState<number | null>(null);
   const [slots, setSlots] = useState<Omit<BudgetSlot, 'id' | 'plan_id'>[]>([]);
   const [saving, setSaving] = useState(false);
 
@@ -36,20 +35,16 @@ const BudgetScreen: React.FC = () => {
   useEffect(() => {
     const plan = loadBudgetPlan();
     if (plan) {
-      setSelectedWalletId(plan.wallet_id);
       setSlots(plan.slots.map(s => ({
         name: s.name,
         emoji: s.emoji,
         amount: s.amount,
         color: s.color,
       })));
-    } else if (wallets.length > 0) {
-      setSelectedWalletId(wallets[0].id); // default to first wallet
     }
-  }, [wallets]);
+  }, []);
 
-  const selectedWallet = wallets.find(w => w.id === selectedWalletId);
-  const incomeNum = selectedWallet?.current_balance || 0;
+  const incomeNum = totalBalance || 0;
   const totalAllocated = slots.reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
   const remaining = incomeNum - totalAllocated;
   const fillPct = incomeNum > 0 ? Math.min((totalAllocated / incomeNum) * 100, 100) : 0;
@@ -72,12 +67,8 @@ const BudgetScreen: React.FC = () => {
 
   // ─── Save ─────────────────────────────────────
   const handleSave = useCallback(() => {
-    if (!selectedWalletId) {
-      Alert.alert('Perhatian', 'Pilih sumber dompet terlebih dahulu.');
-      return;
-    }
     if (incomeNum <= 0) {
-      Alert.alert('Perhatian', 'Dompet yang dipilih tidak memiliki saldo.');
+      Alert.alert('Perhatian', 'Total saldo saat ini kosong.');
       return;
     }
     if (slots.length === 0) {
@@ -91,14 +82,15 @@ const BudgetScreen: React.FC = () => {
     if (totalAllocated > incomeNum) {
       Alert.alert(
         'Melebihi Saldo',
-        `Total alokasi ${formatRupiah(totalAllocated)} melebihi saldo dompet ${formatRupiah(incomeNum)}.`
+        `Total alokasi ${formatRupiah(totalAllocated)} melebihi total saldo ${formatRupiah(incomeNum)}.`
       );
       return;
     }
 
     setSaving(true);
     try {
-      saveBudgetPlan(selectedWalletId, slots);
+      const dummyWalletId = wallets.length > 0 ? wallets[0].id! : 0;
+      saveBudgetPlan(dummyWalletId, slots);
       Alert.alert('Tersimpan ✅', 'Rencana anggaran berhasil disimpan!', [
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
@@ -107,11 +99,11 @@ const BudgetScreen: React.FC = () => {
     } finally {
       setSaving(false);
     }
-  }, [incomeNum, slots, totalAllocated, navigation]);
+  }, [incomeNum, slots, totalAllocated, navigation, wallets]);
 
   return (
     <SafeAreaView style={styles.root}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.bg} />
+      <StatusBar barStyle="dark-content" backgroundColor={Colors.bg} />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -135,30 +127,12 @@ const BudgetScreen: React.FC = () => {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled">
 
-          {/* Wallet Selector */}
-          <View style={styles.card}>
-            <Text style={styles.cardLabel}>💼  Pilih Sumber Dompet</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ gap: Spacing.sm, marginTop: Spacing.xs }}>
-              {wallets.map(w => {
-                const isSelected = w.id === selectedWalletId;
-                return (
-                  <TouchableOpacity
-                    key={w.id!}
-                    onPress={() => setSelectedWalletId(w.id!)}
-                    style={[
-                      styles.walletOpt,
-                      isSelected && styles.walletOptActive,
-                      { borderLeftColor: w.color_code }
-                    ]}>
-                    <Text style={styles.walletOptName}>{w.name}</Text>
-                    <Text style={styles.walletOptBalance}>{formatRupiah(w.current_balance ?? w.initial_balance)}</Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
+          {/* Total Balance Source */}
+          <View style={[styles.card, { alignItems: 'center', paddingVertical: Spacing.xl }]}>
+            <Text style={styles.cardLabel}>💼  Sumber Dana (Total Semua Dompet)</Text>
+            <Text style={{ fontSize: Typography['3xl'], fontWeight: Typography.weightExtraBold, color: Colors.textPrimary, marginTop: Spacing.xs, letterSpacing: -1 }}>
+              {formatRupiah(totalBalance)}
+            </Text>
           </View>
 
           {/* Progress Bar */}
