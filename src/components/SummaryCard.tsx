@@ -10,9 +10,10 @@ interface SummaryCardProps {
   label: string;
   amount: number;
   type: 'income' | 'expense';
+  hidden?: boolean;
 }
 
-const SummaryCard: React.FC<SummaryCardProps> = ({label, amount, type}) => {
+const SummaryCard: React.FC<SummaryCardProps> = ({label, amount, type, hidden = false}) => {
   const isIncome = type === 'income';
   const accent = isIncome ? Colors.income : Colors.expense;
   const icon = isIncome ? '↑' : '↓';
@@ -25,7 +26,7 @@ const SummaryCard: React.FC<SummaryCardProps> = ({label, amount, type}) => {
       <View style={styles.info}>
         <Text style={styles.label}>{label}</Text>
         <Text style={[styles.amount, {color: accent}]} numberOfLines={1}>
-          {formatRupiah(amount)}
+          {hidden ? '••••••' : formatRupiah(amount)}
         </Text>
       </View>
     </View>

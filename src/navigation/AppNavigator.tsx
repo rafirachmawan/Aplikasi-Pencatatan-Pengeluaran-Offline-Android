@@ -13,6 +13,7 @@ import WalletScreen from '../screens/WalletScreen';
 import ReportScreen from '../screens/ReportScreen';
 import CategoryScreen from '../screens/CategoryScreen';
 import TransactionDetailScreen from '../screens/TransactionDetailScreen';
+import BudgetScreen from '../screens/BudgetScreen';
 
 export type RootStackParamList = {
   Dashboard: undefined;
@@ -21,6 +22,7 @@ export type RootStackParamList = {
   Report: undefined;
   Category: undefined;
   TransactionDetail: {transactionId: number};
+  Budget: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -48,6 +50,11 @@ const AppNavigator: React.FC = () => {
         <Stack.Screen name="Report"      component={ReportScreen} />
         <Stack.Screen name="Category"    component={CategoryScreen} />
         <Stack.Screen name="TransactionDetail" component={TransactionDetailScreen} />
+        <Stack.Screen
+          name="Budget"
+          component={BudgetScreen}
+          options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

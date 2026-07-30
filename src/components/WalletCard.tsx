@@ -10,9 +10,10 @@ import {Wallet} from '../types';
 interface WalletCardProps {
   wallet: Wallet;
   onPress?: (wallet: Wallet) => void;
+  hidden?: boolean;
 }
 
-const WalletCard: React.FC<WalletCardProps> = ({wallet, onPress}) => {
+const WalletCard: React.FC<WalletCardProps> = ({wallet, onPress, hidden}) => {
   const color = wallet.color_code ?? Colors.primary;
   const balance = wallet.current_balance ?? wallet.initial_balance;
   const isPositive = balance >= 0;
@@ -28,11 +29,15 @@ const WalletCard: React.FC<WalletCardProps> = ({wallet, onPress}) => {
           {wallet.name}
         </Text>
       </View>
-      <Text style={[styles.balance, {color: isPositive ? Colors.textPrimary : Colors.expense}]}>
-        {formatRupiah(balance)}
+      <Text 
+        style={[styles.balance, {color: isPositive ? Colors.textPrimary : Colors.expense}]}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+      >
+        {hidden ? '••••••••' : formatRupiah(balance)}
       </Text>
-      <Text style={styles.initialLabel}>
-        Saldo Awal: {formatRupiah(wallet.initial_balance)}
+      <Text style={styles.initialLabel} numberOfLines={1}>
+        Saldo Awal: {hidden ? '••••••••' : formatRupiah(wallet.initial_balance)}
       </Text>
     </TouchableOpacity>
   );
@@ -44,7 +49,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.lg,
     padding: Spacing.lg,
     marginRight: Spacing.md,
-    width: 180,
+    width: 200,
     borderTopWidth: 3,
     ...Shadow.card,
   },

@@ -17,7 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import {RootStackParamList} from '../navigation/AppNavigator';
 import {Colors, Typography, Spacing, Radius, Shadow} from '../utils/theme';
-import {formatRupiah} from '../utils/currency';
+import {formatRupiah, formatInputAmount} from '../utils/currency';
 import {today} from '../utils/date';
 import {useWalletStore} from '../store/useWalletStore';
 import {createTransfer} from '../database/queries/transferQueries';
@@ -184,14 +184,17 @@ const WalletScreen: React.FC = () => {
             />
 
             <Text style={styles.inputLabel}>Saldo Awal</Text>
-            <TextInput
-              style={styles.input}
-              value={newBalance}
-              onChangeText={setNewBalance}
-              placeholder="0"
-              placeholderTextColor={Colors.textTertiary}
-              keyboardType="numeric"
-            />
+            <View style={styles.amountInputWrapper}>
+              <Text style={styles.rpPrefix}>Rp</Text>
+              <TextInput
+                style={styles.amountInput}
+                value={newBalance}
+                onChangeText={(text) => setNewBalance(formatInputAmount(text))}
+                placeholder="0"
+                placeholderTextColor={Colors.textTertiary}
+                keyboardType="numeric"
+              />
+            </View>
 
             <Text style={styles.inputLabel}>Warna</Text>
             <View style={styles.colorRow}>
@@ -259,14 +262,17 @@ const WalletScreen: React.FC = () => {
             </ScrollView>
 
             <Text style={styles.inputLabel}>Nominal</Text>
-            <TextInput
-              style={styles.input}
-              value={transferAmount}
-              onChangeText={setTransferAmount}
-              placeholder="0"
-              placeholderTextColor={Colors.textTertiary}
-              keyboardType="numeric"
-            />
+            <View style={styles.amountInputWrapper}>
+              <Text style={styles.rpPrefix}>Rp</Text>
+              <TextInput
+                style={styles.amountInput}
+                value={transferAmount}
+                onChangeText={(text) => setTransferAmount(formatInputAmount(text))}
+                placeholder="0"
+                placeholderTextColor={Colors.textTertiary}
+                keyboardType="numeric"
+              />
+            </View>
 
             <View style={styles.modalActions}>
               <TouchableOpacity
@@ -382,6 +388,29 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
     marginBottom: Spacing.sm,
+  },
+  amountInputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.bgInput,
+    borderRadius: Radius.md,
+    paddingHorizontal: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    marginBottom: Spacing.sm,
+  },
+  rpPrefix: {
+    fontSize: Typography.base,
+    color: Colors.textSecondary,
+    fontWeight: Typography.weightBold,
+    marginRight: Spacing.sm,
+  },
+  amountInput: {
+    flex: 1,
+    paddingVertical: Spacing.sm,
+    fontSize: Typography.base,
+    color: Colors.textPrimary,
+    fontWeight: Typography.weightBold,
   },
   colorRow: {flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.sm, flexWrap: 'wrap'},
   colorSwatch: {width: 28, height: 28, borderRadius: Radius.full},

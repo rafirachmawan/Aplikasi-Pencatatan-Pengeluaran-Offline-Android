@@ -9,6 +9,7 @@ import {
   ScrollView,
   TouchableOpacity,
   StatusBar,
+  Image,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
@@ -34,6 +35,7 @@ const DashboardScreen: React.FC = () => {
   const navigation = useNavigation<Nav>();
   
   const [showActionSheet, setShowActionSheet] = useState(false);
+  const [balanceHidden, setBalanceHidden] = useState(false);
 
   const {wallets, totalBalance, fetchWallets} = useWalletStore();
   const {summary, recentTransactions, selectedMonth, fetchTransactions, fetchRecent} =
@@ -51,10 +53,31 @@ const DashboardScreen: React.FC = () => {
     }));
   }, [selectedMonth]);
 
+  // Live clock
+  const [currentTime, setCurrentTime] = useState(() => {
+    const now = new Date();
+    return now.toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'});
+  });
+
+  const dayName = new Date().toLocaleDateString('id-ID', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'short',
+  });
+
   useEffect(() => {
     fetchWallets();
     fetchTransactions();
     fetchRecent();
+  }, []);
+
+  // Update clock every minute
+  useEffect(() => {
+    const tick = setInterval(() => {
+      const now = new Date();
+      setCurrentTime(now.toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'}));
+    }, 60_000);
+    return () => clearInterval(tick);
   }, []);
 
   const handleAddPress = useCallback(() => {
@@ -78,39 +101,87 @@ const DashboardScreen: React.FC = () => {
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}>
 
-        {/* ── Header ── */}
+        {/* Header */}
         <View style={styles.header}>
-          <View>
-            <Text style={styles.greeting}>Selamat datang 👋</Text>
-            <Text style={styles.monthLabel}>{currentMonthLabel()}</Text>
+
+          {/* Row 1: Branding kiri + Chip jam/hari kanan */}
+          <View style={styles.headerTopRow}>
+            <View style={styles.brandRow}>
+              <Image 
+                source={require('../../assets/Finanku.png')} 
+                style={styles.brandImage}
+                resizeMode="contain"
+              />
+              <Text style={styles.brandName}>FinanKu</Text>
+            </View>
+
+            <View style={styles.dateTimeChip}>
+              <Text style={styles.clockText}>{currentTime}</Text>
+              <View style={styles.chipDivider} />
+              <Text style={styles.datePillText}>{dayName}</Text>
+            </View>
           </View>
-          <TouchableOpacity
-            style={styles.walletBtn}
-            onPress={() => navigation.navigate('Wallet')}>
-            <Text style={styles.walletBtnText}>💰</Text>
-          </TouchableOpacity>
+
+          {/* Row 2: Slogan */}
+          <Text style={styles.slogan}>
+            Catat. Kelola.{'\n'}
+            <Text style={styles.sloganAccent}>Bertumbuh.</Text>
+          </Text>
+
         </View>
 
-        {/* ── Total Balance Card ── */}
+        {/* Total Balance Card */}
         <View style={styles.balanceCard}>
-          <Text style={styles.balanceLabel}>Total Saldo</Text>
-          <Text style={styles.balanceAmount}>{formatRupiah(totalBalance)}</Text>
+          {/* Label + toggle mata */}
+          <View style={styles.balanceLabelRow}>
+            <Text style={styles.balanceLabel}>Total Saldo</Text>
+            <TouchableOpacity
+              onPress={() => setBalanceHidden(v => !v)}
+              style={styles.eyeBtn}
+              activeOpacity={0.7}>
+              <Text style={styles.eyeIcon}>
+                {balanceHidden ? '🙈' : '👁️'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text style={styles.balanceAmount}>
+            {balanceHidden ? '• • • • • •' : formatRupiah(totalBalance)}
+          </Text>
+
           <View style={styles.summaryRow}>
             <SummaryCard
               label="Pemasukan"
               amount={summary.total_income}
               type="income"
+              hidden={balanceHidden}
             />
             <View style={{width: Spacing.sm}} />
             <SummaryCard
               label="Pengeluaran"
               amount={summary.total_expense}
               type="expense"
+              hidden={balanceHidden}
             />
           </View>
         </View>
 
-        {/* ── Wallets Horizontal Scroll ── */}
+        {/* Amplop Digital Banner */}
+        <TouchableOpacity
+          style={styles.budgetBanner}
+          onPress={() => navigation.navigate('Budget')}
+          activeOpacity={0.85}>
+          <View style={styles.budgetBannerLeft}>
+            <Text style={styles.budgetBannerEmoji}>🪙</Text>
+            <View>
+              <Text style={styles.budgetBannerTitle}>Amplop Digital</Text>
+              <Text style={styles.budgetBannerDesc}>Atur alokasi gaji & anggaran bulanan</Text>
+            </View>
+          </View>
+          <Text style={styles.budgetBannerArrow}>→</Text>
+        </TouchableOpacity>
+
+        {/* Wallets Horizontal Scroll */}
         {wallets.length > 0 && (
           <View style={styles.section}>
             <SectionHeader
@@ -127,6 +198,7 @@ const DashboardScreen: React.FC = () => {
                   key={w.id}
                   wallet={w}
                   onPress={() => navigation.navigate('Wallet')}
+                  hidden={balanceHidden}
                 />
               ))}
             </ScrollView>
@@ -261,32 +333,70 @@ const styles = StyleSheet.create({
 
   // Header
   header: {
+    marginBottom: Spacing.xl,
+    gap: Spacing.lg,
+  },
+  headerTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.xl,
   },
-  greeting: {
-    fontSize: Typography.base,
-    color: Colors.textSecondary,
-    marginBottom: 2,
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
   },
-  monthLabel: {
-    fontSize: Typography['2xl'],
-    color: Colors.textPrimary,
-    fontWeight: Typography.weightExtraBold,
-  },
-  walletBtn: {
+  brandImage: {
     width: 44,
     height: 44,
-    borderRadius: Radius.full,
-    backgroundColor: Colors.bgCard,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...Shadow.card,
+    transform: [{ scale: 4.5 }],
+    marginLeft: Spacing.sm,
+    marginRight: Spacing.xs,
   },
-  walletBtnText: {fontSize: 22},
-
+  brandName: {
+    fontSize: Typography.lg,
+    fontWeight: Typography.weightExtraBold,
+    color: Colors.textPrimary,
+    letterSpacing: 0.5,
+  },
+  slogan: {
+    fontSize: Typography['2xl'],
+    fontWeight: Typography.weightExtraBold,
+    color: Colors.textPrimary,
+    lineHeight: 34,
+    letterSpacing: -0.3,
+  },
+  sloganAccent: {
+    color: Colors.primary,
+  },
+  dateTimeChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.primary + '18',
+    borderWidth: 1,
+    borderColor: Colors.primary + '40',
+    borderRadius: Radius.full,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    gap: 10,
+  },
+  chipDivider: {
+    width: 1,
+    height: 14,
+    backgroundColor: Colors.primary + '50',
+  },
+  clockText: {
+    fontSize: Typography.sm,
+    fontWeight: Typography.weightBold,
+    color: Colors.primaryLight,
+    letterSpacing: 0.5,
+  },
+  datePillText: {
+    fontSize: Typography.sm,
+    color: Colors.primaryLight,
+    fontWeight: Typography.weightSemiBold,
+    letterSpacing: 0.2,
+  },
   // Balance Card
   balanceCard: {
     backgroundColor: Colors.bgCardElevated,
@@ -296,6 +406,55 @@ const styles = StyleSheet.create({
     ...Shadow.elevated,
     borderWidth: 1,
     borderColor: Colors.primary + '33',
+  },
+  // Budget Banner
+  budgetBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: Colors.bgCardElevated,
+    borderRadius: Radius.xl,
+    padding: Spacing.lg,
+    marginBottom: Spacing.xl,
+    borderWidth: 1,
+    borderColor: Colors.primary + '44',
+    ...Shadow.card,
+  },
+  budgetBannerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    flex: 1,
+  },
+  budgetBannerEmoji: {
+    fontSize: 28,
+  },
+  budgetBannerTitle: {
+    fontSize: Typography.md,
+    fontWeight: Typography.weightBold,
+    color: Colors.textPrimary,
+    marginBottom: 2,
+  },
+  budgetBannerDesc: {
+    fontSize: Typography.xs,
+    color: Colors.textSecondary,
+  },
+  budgetBannerArrow: {
+    fontSize: Typography.lg,
+    color: Colors.primary,
+    fontWeight: Typography.weightBold,
+  },
+  balanceLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.xs,
+  },
+  eyeBtn: {
+    padding: 4,
+  },
+  eyeIcon: {
+    fontSize: 18,
   },
   balanceLabel: {
     fontSize: Typography.sm,

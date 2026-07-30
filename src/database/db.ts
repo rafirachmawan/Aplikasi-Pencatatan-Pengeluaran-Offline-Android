@@ -94,6 +94,32 @@ const initSchema = () => {
   database.execSync(`CREATE INDEX IF NOT EXISTS idx_tx_date   ON transactions(transaction_date);`);
   database.execSync(`CREATE INDEX IF NOT EXISTS idx_tx_wallet ON transactions(wallet_id);`);
   database.execSync(`CREATE INDEX IF NOT EXISTS idx_tx_cat    ON transactions(category_id);`);
+
+  // Budget planner
+  // Drop tables to apply schema change from percentage to amount
+  database.execSync(`DROP TABLE IF EXISTS budget_slots;`);
+  database.execSync(`DROP TABLE IF EXISTS budget_plans;`);
+
+  database.execSync(`
+    CREATE TABLE IF NOT EXISTS budget_plans (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      wallet_id  INTEGER NOT NULL,
+      updated_at TEXT    NOT NULL DEFAULT (date('now')),
+      FOREIGN KEY (wallet_id) REFERENCES wallets(id) ON DELETE CASCADE
+    );
+  `);
+
+  database.execSync(`
+    CREATE TABLE IF NOT EXISTS budget_slots (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      plan_id    INTEGER NOT NULL,
+      name       TEXT    NOT NULL,
+      emoji      TEXT    DEFAULT '📦',
+      amount     REAL    NOT NULL DEFAULT 0,
+      color      TEXT    NOT NULL DEFAULT '#818CF8',
+      FOREIGN KEY (plan_id) REFERENCES budget_plans(id) ON DELETE CASCADE
+    );
+  `);
 };
 
 // ─── Seeder — Default Categories ──────────────
