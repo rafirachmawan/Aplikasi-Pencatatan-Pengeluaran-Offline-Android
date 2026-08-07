@@ -15,15 +15,28 @@ export interface BudgetSlot {
 export interface BudgetPlan {
   id?: number;
   wallet_id: number;
+  period_month?: string;
   slots: BudgetSlot[];
 }
 
-// ─── Load current plan (latest) ───────────────
-export const loadBudgetPlan = (): BudgetPlan | null => {
+// ─── Load plan by period (strict match when period given) ─
+export const loadBudgetPlan = (periodMonth?: string): BudgetPlan | null => {
   const db = getDB();
-  const plan = db.getFirstSync(
-    `SELECT id, wallet_id FROM budget_plans ORDER BY id DESC LIMIT 1;`
-  ) as { id: number; wallet_id: number } | undefined;
+  let plan: { id: number; wallet_id: number; period_month?: string } | undefined;
+
+  if (periodMonth) {
+    // Strict match: only return plan for the requested period
+    plan = db.getFirstSync(
+      `SELECT id, wallet_id, period_month FROM budget_plans WHERE period_month = ? ORDER BY id DESC LIMIT 1;`,
+      [periodMonth]
+    ) as { id: number; wallet_id: number; period_month?: string } | undefined;
+  } else {
+    // No period specified: return the latest plan
+    plan = db.getFirstSync(
+      `SELECT id, wallet_id, period_month FROM budget_plans ORDER BY id DESC LIMIT 1;`
+    ) as { id: number; wallet_id: number; period_month?: string } | undefined;
+  }
+
   if (!plan) return null;
 
   const slots = db.getAllSync(
@@ -31,19 +44,28 @@ export const loadBudgetPlan = (): BudgetPlan | null => {
     [plan.id]
   ) as BudgetSlot[];
 
-  return { id: plan.id, wallet_id: plan.wallet_id, slots };
+  return { id: plan.id, wallet_id: plan.wallet_id, period_month: plan.period_month, slots };
 };
 
-// ─── Save (upsert) plan ────────────────────────
-export const saveBudgetPlan = (walletId: number, slots: Omit<BudgetSlot, 'id' | 'plan_id'>[]): void => {
+// ─── Save (upsert) plan by period ──────────────
+export const saveBudgetPlan = (
+  walletId: number,
+  slots: Omit<BudgetSlot, 'id' | 'plan_id'>[],
+  periodMonth?: string
+): void => {
   const db = getDB();
+  const period = periodMonth || new Date().toISOString().slice(0, 7);
 
-  db.runSync(`DELETE FROM budget_slots WHERE plan_id IN (SELECT id FROM budget_plans);`);
-  db.runSync(`DELETE FROM budget_plans;`);
+  // Delete existing plan for this period
+  db.runSync(
+    `DELETE FROM budget_slots WHERE plan_id IN (SELECT id FROM budget_plans WHERE period_month = ?);`,
+    [period]
+  );
+  db.runSync(`DELETE FROM budget_plans WHERE period_month = ?;`, [period]);
 
   const result = db.runSync(
-    `INSERT INTO budget_plans (wallet_id, updated_at) VALUES (?, date('now'));`,
-    [walletId]
+    `INSERT INTO budget_plans (wallet_id, period_month, updated_at) VALUES (?, ?, date('now'));`,
+    [walletId, period]
   );
   const planId = result.lastInsertRowId;
 

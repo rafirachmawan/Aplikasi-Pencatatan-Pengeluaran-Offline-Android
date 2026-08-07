@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────────
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
-import {Colors, Typography, Spacing, Radius} from '../utils/theme';
+import {Colors, Typography, Spacing, Radius, Shadow} from '../utils/theme';
 import {formatRupiah} from '../utils/currency';
 import {formatDate} from '../utils/date';
 import {Transaction} from '../types';
@@ -22,18 +22,19 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
   const isIncome = item.type === 'INCOME';
   const amountColor = isIncome ? Colors.income : Colors.expense;
   const amountPrefix = isIncome ? '+' : '-';
+  const badgeBg = isIncome ? Colors.incomeLight : Colors.bgInput;
 
   return (
     <TouchableOpacity
       style={styles.card}
-      activeOpacity={0.7}
+      activeOpacity={0.75}
       onPress={() => onPress?.(item)}
       onLongPress={() => onLongPress?.(item)}>
       {/* Icon */}
       <View
         style={[
           styles.iconContainer,
-          {backgroundColor: (item.wallet_color ?? Colors.primary) + '33'},
+          { backgroundColor: badgeBg },
         ]}>
         <Text style={styles.iconEmoji}>
           {getCategoryEmoji(item.category_icon ?? '')}
@@ -86,13 +87,15 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'transparent',
+    backgroundColor: Colors.bgCard,
+    borderRadius: Radius.lg,
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm + 4,
-    marginBottom: Spacing.xs,
+    paddingVertical: Spacing.md - 2,
+    marginBottom: Spacing.sm,
     gap: Spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    ...Shadow.soft,
   },
   iconContainer: {
     width: 44,
@@ -114,7 +117,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   walletName: {
-    fontSize: Typography.sm,
+    fontSize: Typography.xs,
     fontFamily: Typography.fontRegular,
     color: Colors.textSecondary,
   },
@@ -123,11 +126,12 @@ const styles = StyleSheet.create({
   },
   amount: {
     fontSize: Typography.base,
-    fontFamily: Typography.fontSemiBold,
+    fontFamily: Typography.fontExtraBold,
     marginBottom: 2,
+    letterSpacing: -0.3,
   },
   date: {
-    fontSize: Typography.xs,
+    fontSize: Typography.xs - 1,
     fontFamily: Typography.fontRegular,
     color: Colors.textTertiary,
   },

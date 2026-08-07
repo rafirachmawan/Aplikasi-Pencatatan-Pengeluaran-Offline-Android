@@ -4,22 +4,31 @@
 
 export const Colors = {
   // Backgrounds
-  bg: '#FFFFFF',            // Clean White
-  bgCard: '#F8FAFC',        // Slate 50 for flat cards
+  bg: '#F8FAFC',            // Soft Slate 50 for clean modern app background
+  bgCard: '#FFFFFF',        // Pure White for cards
   bgCardElevated: '#FFFFFF',// White for elevated cards
   bgInput: '#F1F5F9',       // Slate 100 for inputs
 
+  // Hero Card (Dark Mode Premium accent)
+  heroBg: '#0F172A',        // Slate 900 for Hero Card
+  heroBorder: '#1E293B',    // Slate 800
+  heroTextPrimary: '#FFFFFF',
+  heroTextSecondary: '#94A3B8',
+
   // Brand / Primary
-  primary: '#09090B',       // Black for primary actions/branding
-  primaryDark: '#27272A',
-  primaryLight: '#52525B',
+  primary: '#0F172A',       // Slate 900 for primary actions/branding
+  primaryDark: '#020617',
+  primaryLight: '#334155',
 
   // Semantic (Desaturated & Elegant)
   income: '#10B981',        // Emerald Green
-  incomeLight: '#D1FAE5',
-  expense: '#EF4444',       // Rose Red
-  expenseLight: '#FEE2E2',
+  incomeLight: '#ECFDF5',
+  incomeDark: '#059669',
+  expense: '#F43F5E',       // Rose Red
+  expenseLight: '#FFF1F2',
+  expenseDark: '#E11D48',
   transfer: '#3B82F6',      // Blue
+  transferLight: '#EFF6FF',
 
   // Text
   textPrimary: '#0F172A',   // Slate 900
@@ -29,13 +38,13 @@ export const Colors = {
 
   // Divider / Border
   border: '#E2E8F0',        // Slate 200
+  borderLight: '#F1F5F9',
   divider: '#F1F5F9',
 
-  // Chart colors (Premium Monochromatic & Muted)
+  // Chart colors (Premium Monochromatic & Vibrant Accents)
   chartColors: [
-    '#0F172A', '#334155', '#64748B', '#94A3B8',
-    '#CBD5E1', '#10B981', '#3B82F6', '#6366F1',
-    '#F59E0B', '#EF4444',
+    '#0F172A', '#2563EB', '#10B981', '#F59E0B',
+    '#8B5CF6', '#F43F5E', '#06B6D4', '#64748B',
   ],
 };
 
@@ -79,22 +88,37 @@ export const Radius = {
   md: 12,
   lg: 16,
   xl: 24,
+  '2xl': 32,
   full: 999,
 };
 
 export const Shadow = {
-  card: {
-    shadowColor: '#000',
+  soft: {
+    shadowColor: '#64748B',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  card: {
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
   },
   elevated: {
-    shadowColor: '#000',
+    shadowColor: '#0F172A',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+  hero: {
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 24,
     elevation: 10,
   },
 };

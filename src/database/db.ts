@@ -102,9 +102,10 @@ const initSchema = () => {
 
   database.execSync(`
     CREATE TABLE IF NOT EXISTS budget_plans (
-      id         INTEGER PRIMARY KEY AUTOINCREMENT,
-      wallet_id  INTEGER NOT NULL,
-      updated_at TEXT    NOT NULL DEFAULT (date('now')),
+      id           INTEGER PRIMARY KEY AUTOINCREMENT,
+      wallet_id    INTEGER NOT NULL,
+      period_month TEXT    NOT NULL DEFAULT (strftime('%Y-%m', 'now')),
+      updated_at   TEXT    NOT NULL DEFAULT (date('now')),
       FOREIGN KEY (wallet_id) REFERENCES wallets(id) ON DELETE CASCADE
     );
   `);

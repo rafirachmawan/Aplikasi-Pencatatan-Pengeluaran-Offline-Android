@@ -11,21 +11,34 @@ interface SummaryCardProps {
   amount: number;
   type: 'income' | 'expense';
   hidden?: boolean;
+  variant?: 'light' | 'dark';
 }
 
-const SummaryCard: React.FC<SummaryCardProps> = ({label, amount, type, hidden = false}) => {
+const SummaryCard: React.FC<SummaryCardProps> = ({
+  label,
+  amount,
+  type,
+  hidden = false,
+  variant = 'dark',
+}) => {
   const isIncome = type === 'income';
+  const isDark = variant === 'dark';
   const accent = isIncome ? Colors.income : Colors.expense;
-  const icon = isIncome ? '↑' : '↓';
+  const badgeBg = isDark
+    ? isIncome ? 'rgba(16, 185, 129, 0.18)' : 'rgba(244, 63, 94, 0.18)'
+    : isIncome ? Colors.incomeLight : Colors.expenseLight;
+  const icon = isIncome ? '↙' : '↗';
 
   return (
-    <View style={styles.card}>
-      <View style={[styles.iconBadge, {backgroundColor: accent + '22'}]}>
-        <Text style={[styles.iconText, {color: accent}]}>{icon}</Text>
+    <View style={[styles.card, isDark ? styles.cardDark : styles.cardLight]}>
+      <View style={[styles.iconBadge, { backgroundColor: badgeBg }]}>
+        <Text style={[styles.iconText, { color: accent }]}>{icon}</Text>
       </View>
       <View style={styles.info}>
-        <Text style={styles.label}>{label}</Text>
-        <Text style={[styles.amount, {color: accent}]} numberOfLines={1}>
+        <Text style={[styles.label, { color: isDark ? Colors.heroTextSecondary : Colors.textSecondary }]}>
+          {label}
+        </Text>
+        <Text style={[styles.amount, { color: isDark ? Colors.heroTextPrimary : Colors.textPrimary }]} numberOfLines={1}>
           {hidden ? '••••••' : formatRupiah(amount)}
         </Text>
       </View>
@@ -38,20 +51,31 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.bgCardElevated,
     borderRadius: Radius.lg,
-    padding: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm + 2,
     gap: Spacing.sm,
   },
+  cardDark: {
+    backgroundColor: 'rgba(255, 255, 255, 0.07)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+  },
+  cardLight: {
+    backgroundColor: Colors.bgCard,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    ...Shadow.soft,
+  },
   iconBadge: {
-    width: 36,
-    height: 36,
+    width: 32,
+    height: 32,
     borderRadius: Radius.full,
     alignItems: 'center',
     justifyContent: 'center',
   },
   iconText: {
-    fontSize: Typography.lg,
+    fontSize: Typography.md,
     fontFamily: Typography.fontBold,
   },
   info: {
@@ -59,13 +83,13 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: Typography.xs,
-    color: Colors.textSecondary,
     fontFamily: Typography.fontMedium,
     marginBottom: 2,
   },
   amount: {
-    fontSize: Typography.sm,
+    fontSize: Typography.sm + 1,
     fontFamily: Typography.fontBold,
+    letterSpacing: -0.2,
   },
 });
 

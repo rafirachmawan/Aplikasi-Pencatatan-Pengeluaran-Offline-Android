@@ -21,45 +21,65 @@ const WalletCard: React.FC<WalletCardProps> = ({wallet, onPress, hidden}) => {
   return (
     <TouchableOpacity
       style={styles.card}
-      activeOpacity={0.75}
+      activeOpacity={0.8}
       onPress={() => onPress?.(wallet)}>
-      <View style={styles.top}>
-        <View style={[styles.colorDot, {backgroundColor: color}]} />
-        <Text style={styles.name} numberOfLines={1}>
-          {wallet.name}
+      {/* Top Accent Strip */}
+      <View style={[styles.accentStrip, { backgroundColor: color }]} />
+      
+      <View style={styles.content}>
+        <View style={styles.top}>
+          <View style={[styles.badge, { backgroundColor: color + '1F' }]}>
+            <View style={[styles.colorDot, { backgroundColor: color }]} />
+          </View>
+          <Text style={styles.name} numberOfLines={1}>
+            {wallet.name}
+          </Text>
+        </View>
+        <Text 
+          style={[styles.balance, {color: isPositive ? Colors.textPrimary : Colors.expense}]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+        >
+          {hidden ? '••••••••' : formatRupiah(balance)}
+        </Text>
+        <Text style={styles.initialLabel} numberOfLines={1}>
+          Awal: {hidden ? '••••••••' : formatRupiah(wallet.initial_balance)}
         </Text>
       </View>
-      <Text 
-        style={[styles.balance, {color: isPositive ? Colors.textPrimary : Colors.expense}]}
-        numberOfLines={1}
-        adjustsFontSizeToFit
-      >
-        {hidden ? '••••••••' : formatRupiah(balance)}
-      </Text>
-      <Text style={styles.initialLabel} numberOfLines={1}>
-        Saldo Awal: {hidden ? '••••••••' : formatRupiah(wallet.initial_balance)}
-      </Text>
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: Colors.bgCard, // Slightly off-white for contrast
-    borderRadius: Radius.md,
-    padding: Spacing.md,
+    backgroundColor: Colors.bgCard,
+    borderRadius: Radius.lg,
     marginRight: Spacing.md,
-    width: 160,
+    width: 165,
     borderWidth: 1,
     borderColor: Colors.border,
+    overflow: 'hidden',
     ...Shadow.card,
-    elevation: 2,
+  },
+  accentStrip: {
+    height: 4,
+    width: '100%',
+  },
+  content: {
+    padding: Spacing.md,
   },
   top: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.xs,
-    marginBottom: Spacing.xs,
+    gap: Spacing.sm,
+    marginBottom: Spacing.xs + 2,
+  },
+  badge: {
+    width: 20,
+    height: 20,
+    borderRadius: Radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   colorDot: {
     width: 8,
@@ -73,13 +93,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   balance: {
-    fontSize: Typography.lg,
-    fontFamily: Typography.fontBold,
+    fontSize: Typography.md,
+    fontFamily: Typography.fontExtraBold,
     marginBottom: 4,
-    letterSpacing: -0.5,
+    letterSpacing: -0.4,
   },
   initialLabel: {
-    fontSize: 10,
+    fontSize: Typography.xs - 1,
     fontFamily: Typography.fontRegular,
     color: Colors.textTertiary,
   },

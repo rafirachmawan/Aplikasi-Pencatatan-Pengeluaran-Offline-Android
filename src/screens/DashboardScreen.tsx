@@ -15,21 +15,21 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { PieChart } from "react-native-gifted-charts";
+import dayjs from 'dayjs';
 
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { Colors, Typography, Spacing, Radius, Shadow } from "../utils/theme";
 import { formatRupiah, formatRupiahCompact } from "../utils/currency";
 import { currentMonthLabel } from "../utils/date";
 import { getCategoryExpenses } from "../database/queries/transactionQueries";
+import { loadBudgetPlan, BudgetSlot } from "../database/queries/budgetQueries";
 
 import { useWalletStore } from "../store/useWalletStore";
 import { useTransactionStore } from "../store/useTransactionStore";
 
-import SummaryCard from "../components/SummaryCard";
-import TransactionCard from "../components/TransactionCard";
 import WalletCard from "../components/WalletCard";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -37,13 +37,12 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 const DashboardScreen: React.FC = () => {
   const navigation = useNavigation<Nav>();
 
-  const [showActionSheet, setShowActionSheet] = useState(false);
   const [balanceHidden, setBalanceHidden] = useState(false);
+  const [budgetSlots, setBudgetSlots] = useState<BudgetSlot[]>([]);
 
   const { wallets, totalBalance, fetchWallets } = useWalletStore();
   const {
     summary,
-    recentTransactions,
     selectedMonth,
     fetchTransactions,
     fetchRecent,
@@ -75,11 +74,21 @@ const DashboardScreen: React.FC = () => {
     month: "short",
   });
 
-  useEffect(() => {
-    fetchWallets();
-    fetchTransactions();
-    fetchRecent();
-  }, []);
+  // Reload data when screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      fetchWallets();
+      fetchTransactions();
+      fetchRecent();
+      const currentPeriod = dayjs().format('YYYY-MM');
+      const plan = loadBudgetPlan(currentPeriod);
+      if (plan) {
+        setBudgetSlots(plan.slots);
+      } else {
+        setBudgetSlots([]);
+      }
+    }, [])
+  );
 
   // Update clock exactly when minute changes
   useEffect(() => {
@@ -92,20 +101,6 @@ const DashboardScreen: React.FC = () => {
     }, 1000);
     return () => clearInterval(tick);
   }, []);
-
-  const handleAddPress = useCallback(() => {
-    setShowActionSheet(true);
-  }, []);
-
-  const handleAddTransaction = () => {
-    setShowActionSheet(false);
-    navigation.navigate("AddTransaction");
-  };
-
-  const handleAddWallet = () => {
-    setShowActionSheet(false);
-    navigation.navigate("Wallet");
-  };
 
   return (
     <SafeAreaView style={styles.root}>
@@ -140,11 +135,13 @@ const DashboardScreen: React.FC = () => {
           </Text>
         </View>
 
-        {/* Total Balance Card */}
-        <View style={styles.balanceCard}>
-          {/* Label + toggle mata */}
-          <View style={styles.balanceLabelRow}>
-            <Text style={styles.balanceLabel}>Total Saldo</Text>
+        {/* ── Hero Balance Card (Dark Slate Accent) ── */}
+        <View style={styles.heroCard}>
+          <View style={styles.heroTopRow}>
+            <View style={styles.heroLabelBadge}>
+              <Text style={styles.heroLabelDot}>●</Text>
+              <Text style={styles.heroLabelText}>Total Saldo</Text>
+            </View>
             <TouchableOpacity
               onPress={() => setBalanceHidden((v) => !v)}
               style={styles.eyeBtn}
@@ -154,46 +151,34 @@ const DashboardScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.balanceAmount}>
+          <Text style={styles.heroBalanceAmount}>
             {balanceHidden ? "• • • • • •" : formatRupiah(totalBalance)}
           </Text>
-
-          <View style={styles.summaryRow}>
-            <SummaryCard
-              label="Pemasukan"
-              amount={summary.total_income}
-              type="income"
-              hidden={balanceHidden}
-            />
-            <View style={{ width: Spacing.sm }} />
-            <SummaryCard
-              label="Pengeluaran"
-              amount={summary.total_expense}
-              type="expense"
-              hidden={balanceHidden}
-            />
-          </View>
         </View>
 
-        {/* Budget Banner */}
+        {/* ── Budget & Dana Banner ── */}
         <TouchableOpacity
           style={styles.budgetBanner}
           activeOpacity={0.8}
           onPress={() => navigation.navigate("Budget")}
         >
           <View style={styles.budgetBannerLeft}>
-            <Text style={styles.budgetBannerEmoji}>🪙</Text>
-            <View>
+            <View style={styles.budgetEmojiBadge}>
+              <Text style={styles.budgetBannerEmoji}>🪙</Text>
+            </View>
+            <View style={{ flex: 1 }}>
               <Text style={styles.budgetBannerTitle}>Alokasi Dana</Text>
               <Text style={styles.budgetBannerDesc}>
                 Atur alokasi gaji & anggaran bulanan
               </Text>
             </View>
           </View>
-          <Text style={styles.budgetBannerArrow}>→</Text>
+          <View style={styles.budgetArrowBadge}>
+            <Text style={styles.budgetBannerArrow}>→</Text>
+          </View>
         </TouchableOpacity>
 
-        {/* Wallets Horizontal Scroll */}
+        {/* ── Wallets Horizontal Scroll ── */}
         {wallets.length > 0 && (
           <View style={styles.section}>
             <SectionHeader
@@ -227,7 +212,7 @@ const DashboardScreen: React.FC = () => {
                 data={pieData}
                 donut
                 innerRadius={70}
-                radius={110}
+                radius={105}
                 centerLabelComponent={() => (
                   <View style={styles.chartCenter}>
                     <Text style={styles.chartCenterLabel}>Total</Text>
@@ -257,96 +242,68 @@ const DashboardScreen: React.FC = () => {
           </View>
         )}
 
-        {/* ── Recent Transactions ── */}
-        <View style={[styles.section, { marginBottom: 100 }]}>
+        {/* ── Monthly Budget Allocations (Alokasi Bulan Ini) ── */}
+        <View style={[styles.section, { marginBottom: Spacing.xl }]}>
           <SectionHeader
-            title="Transaksi Terakhir"
-            onAction={() => navigation.navigate("Report")}
-            actionLabel="Lihat Semua"
+            title="Alokasi Bulan Ini"
+            onAction={() => navigation.navigate("Budget")}
+            actionLabel="Atur Alokasi"
           />
-          {recentTransactions.length === 0 ? (
+          {budgetSlots.length === 0 ? (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyEmoji}>📭</Text>
-              <Text style={styles.emptyText}>Belum ada transaksi</Text>
+              <Text style={styles.emptyEmoji}>🪙</Text>
+              <Text style={styles.emptyText}>Belum Ada Alokasi Bulan Ini</Text>
               <Text style={styles.emptySubtext}>
-                Ketuk tombol + untuk mencatat transaksi pertama
+                Ketuk "Atur Alokasi" untuk membagi anggaran & pos pengeluaran bulanan
               </Text>
+              <TouchableOpacity
+                style={styles.emptyActionBtn}
+                onPress={() => navigation.navigate("Budget")}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.emptyActionText}>+ Atur Alokasi</Text>
+              </TouchableOpacity>
             </View>
           ) : (
-            recentTransactions.map((tx) => (
-              <TransactionCard
-                key={tx.id}
-                item={tx}
-                onPress={() =>
-                  navigation.navigate("TransactionDetail", {
-                    transactionId: tx.id,
-                  })
-                }
-              />
-            ))
+            budgetSlots.map((slot, idx) => {
+              const barPct = totalBalance > 0 ? Math.min((slot.amount / totalBalance) * 100, 100) : 0;
+              return (
+                <TouchableOpacity
+                  key={idx}
+                  style={[styles.allocationCard, { borderLeftColor: slot.color }]}
+                  activeOpacity={0.85}
+                  onPress={() => navigation.navigate("Budget")}
+                >
+                  <View style={styles.allocationEmojiBadge}>
+                    <Text style={styles.allocationEmoji}>{slot.emoji || "📦"}</Text>
+                  </View>
+                  <View style={styles.allocationInfo}>
+                    <View style={styles.allocationTitleRow}>
+                      <Text style={styles.allocationName} numberOfLines={1}>
+                        {slot.name}
+                      </Text>
+                      <Text style={[styles.allocationAmount, { color: slot.color }]}>
+                        {balanceHidden ? "• • • • • •" : formatRupiah(slot.amount)}
+                      </Text>
+                    </View>
+                    <View style={styles.allocationBarBg}>
+                      <View
+                        style={[
+                          styles.allocationBarFill,
+                          {
+                            width: `${barPct}%` as any,
+                            backgroundColor: slot.color,
+                          },
+                        ]}
+                      />
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              );
+            })
           )}
         </View>
       </ScrollView>
-
-      {/* ── Expandable FAB Overlay ── */}
-      {showActionSheet && (
-        <TouchableOpacity
-          style={[
-            StyleSheet.absoluteFill,
-            { backgroundColor: "rgba(0,0,0,0.6)", zIndex: 10 },
-          ]}
-          activeOpacity={1}
-          onPress={() => setShowActionSheet(false)}
-        />
-      )}
-
-      {/* ── Expandable FAB Menu ── */}
-      {showActionSheet && (
-        <View
-          style={[styles.fabMenu, { bottom: Math.max(insets.bottom, 16) + 80 }]}
-        >
-          <View style={styles.fabMenuItem}>
-            <TouchableOpacity
-              style={[styles.miniFab, { backgroundColor: Colors.expense }]}
-              activeOpacity={0.8}
-              onPress={handleAddTransaction}
-            >
-              <Text style={{ fontSize: 24 }}>📝</Text>
-            </TouchableOpacity>
-            <Text style={styles.fabMenuLabel}>Transaksi</Text>
-          </View>
-
-          <View style={styles.fabMenuItem}>
-            <TouchableOpacity
-              style={[styles.miniFab, { backgroundColor: Colors.income }]}
-              activeOpacity={0.8}
-              onPress={handleAddWallet}
-            >
-              <Text style={{ fontSize: 24 }}>👛</Text>
-            </TouchableOpacity>
-            <Text style={styles.fabMenuLabel}>Dompet</Text>
-          </View>
-        </View>
-      )}
-
-      {/* ── Main Floating Action Button ── */}
-      <TouchableOpacity
-        style={[
-          styles.fab,
-          { bottom: Math.max(insets.bottom, 16) + 16, zIndex: 20 },
-        ]}
-        onPress={() => setShowActionSheet(!showActionSheet)}
-        activeOpacity={0.85}
-      >
-        <Text
-          style={[
-            styles.fabText,
-            showActionSheet && { transform: [{ rotate: "45deg" }] },
-          ]}
-        >
-          ＋
-        </Text>
-      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -360,7 +317,7 @@ const SectionHeader: React.FC<{
   <View style={styles.sectionHeader}>
     <Text style={styles.sectionTitle}>{title}</Text>
     {onAction && (
-      <TouchableOpacity onPress={onAction}>
+      <TouchableOpacity onPress={onAction} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
         <Text style={styles.sectionAction}>{actionLabel}</Text>
       </TouchableOpacity>
     )}
@@ -369,12 +326,12 @@ const SectionHeader: React.FC<{
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.bg },
-  scroll: { paddingHorizontal: Spacing.lg, paddingTop: Spacing.xl },
+  scroll: { paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg },
 
   // Header
   header: {
-    marginBottom: Spacing.xl,
-    gap: Spacing.lg,
+    marginBottom: Spacing.lg,
+    gap: Spacing.md,
   },
   headerTopRow: {
     flexDirection: "row",
@@ -384,13 +341,13 @@ const styles = StyleSheet.create({
   brandRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: Spacing.sm,
+    gap: Spacing.xs,
   },
   brandImage: {
-    width: 44,
-    height: 44,
-    transform: [{ scale: 4.5 }],
-    marginLeft: Spacing.sm,
+    width: 38,
+    height: 38,
+    transform: [{ scale: 3.8 }],
+    marginLeft: Spacing.xs,
     marginRight: Spacing.xs,
   },
   brandName: {
@@ -400,31 +357,30 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   slogan: {
-    fontSize: Typography["xl"],
+    fontSize: Typography.lg + 2,
     fontFamily: Typography.fontSemiBold,
     color: Colors.textPrimary,
     letterSpacing: -0.3,
   },
   sloganAccent: {
-    color: Colors.textPrimary,
+    color: Colors.primary,
     fontFamily: Typography.fontExtraBold,
   },
   dateTimeChip: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.bgInput,
+    backgroundColor: Colors.bgCard,
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: Radius.full,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    gap: 8,
-    ...Shadow.card,
-    elevation: 2,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    gap: 6,
+    ...Shadow.soft,
   },
   chipDivider: {
     width: 1,
-    height: 12,
+    height: 10,
     backgroundColor: Colors.textDisabled,
   },
   clockText: {
@@ -433,27 +389,68 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   datePillText: {
-    fontSize: Typography.xs,
+    fontSize: Typography.xs - 1,
     color: Colors.textSecondary,
     fontFamily: Typography.fontMedium,
   },
-  // Balance Card
-  balanceCard: {
-    backgroundColor: Colors.bgCardElevated,
+
+  // Hero Card (Dark Slate Accent)
+  heroCard: {
+    backgroundColor: Colors.heroBg,
     borderRadius: Radius.xl,
-    padding: Spacing["2xl"],
-    marginBottom: Spacing.xl,
-    ...Shadow.elevated,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.lg + 2,
+    marginBottom: Spacing.lg,
+    borderWidth: 1,
+    borderColor: Colors.heroBorder,
+    ...Shadow.hero,
   },
+  heroTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: Spacing.xs,
+  },
+  heroLabelBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  heroLabelDot: {
+    fontSize: 8,
+    color: Colors.income,
+  },
+  heroLabelText: {
+    fontSize: Typography.xs,
+    color: Colors.heroTextSecondary,
+    fontFamily: Typography.fontMedium,
+  },
+  eyeBtn: {
+    padding: 4,
+  },
+  eyeIcon: {
+    fontSize: 16,
+  },
+  heroBalanceAmount: {
+    fontSize: Typography["3xl"] + 2,
+    color: Colors.heroTextPrimary,
+    fontFamily: Typography.fontExtraBold,
+    marginTop: Spacing.xs,
+    marginBottom: Spacing.xs / 2,
+    letterSpacing: -1,
+  },
+
   // Budget Banner
   budgetBanner: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: Colors.bgCardElevated,
-    borderRadius: Radius.xl,
-    padding: Spacing.lg,
-    marginBottom: Spacing.xl,
+    backgroundColor: Colors.bgCard,
+    borderRadius: Radius.lg,
+    padding: Spacing.md + 2,
+    marginBottom: Spacing.lg,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
     ...Shadow.card,
   },
   budgetBannerLeft: {
@@ -462,11 +459,19 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
     flex: 1,
   },
+  budgetEmojiBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: Radius.md,
+    backgroundColor: Colors.bgInput,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   budgetBannerEmoji: {
-    fontSize: 24,
+    fontSize: 20,
   },
   budgetBannerTitle: {
-    fontSize: Typography.md,
+    fontSize: Typography.base,
     fontFamily: Typography.fontSemiBold,
     color: Colors.textPrimary,
     marginBottom: 2,
@@ -476,56 +481,36 @@ const styles = StyleSheet.create({
     fontFamily: Typography.fontRegular,
     color: Colors.textSecondary,
   },
-  budgetBannerArrow: {
-    fontSize: Typography.lg,
-    fontFamily: Typography.fontMedium,
-    color: Colors.textSecondary,
-  },
-  balanceLabelRow: {
-    flexDirection: "row",
+  budgetArrowBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.bgInput,
     alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: Spacing.xs,
+    justifyContent: "center",
+    marginLeft: Spacing.sm,
   },
-  eyeBtn: {
-    padding: 4,
-  },
-  eyeIcon: {
-    fontSize: 16,
-    opacity: 0.8,
-  },
-  balanceLabel: {
+  budgetBannerArrow: {
     fontSize: Typography.sm,
-    color: Colors.textSecondary,
-    fontFamily: Typography.fontMedium,
-    marginBottom: Spacing.xs,
-  },
-  balanceAmount: {
-    fontSize: Typography["3xl"],
+    fontFamily: Typography.fontBold,
     color: Colors.textPrimary,
-    fontFamily: Typography.fontExtraBold,
-    marginBottom: Spacing.lg,
-    letterSpacing: -1,
-  },
-  summaryRow: {
-    flexDirection: "row",
   },
 
   // Wallet list
   walletList: {
     paddingRight: Spacing.lg,
-    paddingBottom: Spacing.sm,
+    paddingBottom: Spacing.xs,
   },
 
   // Section
   section: {
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.lg,
   },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.sm + 4,
   },
   sectionTitle: {
     fontSize: Typography.base,
@@ -534,9 +519,9 @@ const styles = StyleSheet.create({
     letterSpacing: -0.2,
   },
   sectionAction: {
-    fontSize: Typography.sm,
-    color: Colors.textSecondary,
-    fontFamily: Typography.fontMedium,
+    fontSize: Typography.xs + 1,
+    color: Colors.primary,
+    fontFamily: Typography.fontBold,
   },
 
   // Chart
@@ -545,6 +530,9 @@ const styles = StyleSheet.create({
     borderRadius: Radius.xl,
     padding: Spacing.lg,
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    ...Shadow.card,
   },
   chartCenter: {
     alignItems: "center",
@@ -562,7 +550,7 @@ const styles = StyleSheet.create({
   legend: {
     width: "100%",
     marginTop: Spacing.lg,
-    gap: Spacing.xs,
+    gap: Spacing.xs + 2,
   },
   legendItem: {
     flexDirection: "row",
@@ -575,18 +563,80 @@ const styles = StyleSheet.create({
     borderRadius: Radius.full,
   },
   legendText: {
-    fontSize: Typography.sm,
+    fontSize: Typography.xs,
     color: Colors.textSecondary,
-    fontFamily: Typography.fontRegular,
+    fontFamily: Typography.fontMedium,
     flex: 1,
+  },
+
+  // Allocation cards
+  allocationCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.bgCard,
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
+    marginBottom: Spacing.xs + 2,
+    borderLeftWidth: 4,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    gap: Spacing.md,
+    ...Shadow.soft,
+  },
+  allocationEmojiBadge: {
+    width: 38,
+    height: 38,
+    borderRadius: Radius.md,
+    backgroundColor: Colors.bgInput,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  allocationEmoji: {
+    fontSize: 18,
+  },
+  allocationInfo: {
+    flex: 1,
+    gap: 6,
+  },
+  allocationTitleRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  allocationName: {
+    fontSize: Typography.sm + 1,
+    fontFamily: Typography.fontSemiBold,
+    color: Colors.textPrimary,
+    flex: 1,
+    marginRight: Spacing.xs,
+  },
+  allocationAmount: {
+    fontSize: Typography.sm + 1,
+    fontFamily: Typography.fontExtraBold,
+  },
+  allocationBarBg: {
+    height: 6,
+    backgroundColor: Colors.bgInput,
+    borderRadius: Radius.full,
+    overflow: "hidden",
+  },
+  allocationBarFill: {
+    height: "100%",
+    borderRadius: Radius.full,
   },
 
   // Empty state
   emptyState: {
     alignItems: "center",
-    paddingVertical: Spacing["4xl"],
+    paddingVertical: Spacing["2xl"],
+    paddingHorizontal: Spacing.lg,
+    backgroundColor: Colors.bgCard,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    ...Shadow.card,
   },
-  emptyEmoji: { fontSize: 40, marginBottom: Spacing.md, opacity: 0.8 },
+  emptyEmoji: { fontSize: 36, marginBottom: Spacing.sm },
   emptyText: {
     fontSize: Typography.base,
     color: Colors.textPrimary,
@@ -594,62 +644,22 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xs,
   },
   emptySubtext: {
-    fontSize: Typography.sm,
+    fontSize: Typography.xs,
     color: Colors.textSecondary,
     fontFamily: Typography.fontRegular,
     textAlign: "center",
+    marginBottom: Spacing.md,
   },
-
-  // FAB
-  fab: {
-    position: "absolute",
-    alignSelf: "center",
-    width: 60,
-    height: 60,
-    borderRadius: Radius.full,
+  emptyActionBtn: {
     backgroundColor: Colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-    ...Shadow.elevated,
-  },
-  fabText: {
-    fontSize: 28,
-    color: Colors.bg,
-    lineHeight: 32,
-    fontFamily: Typography.fontMedium,
-  },
-
-  // Expandable FAB
-  fabMenu: {
-    position: "absolute",
-    alignSelf: "center",
-    flexDirection: "row",
-    alignItems: "center",
-    zIndex: 20,
-    gap: 40,
-  },
-  fabMenuItem: {
-    alignItems: "center",
-  },
-  fabMenuLabel: {
-    backgroundColor: Colors.bgCardElevated,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: 6,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.xs + 2,
     borderRadius: Radius.full,
-    overflow: "hidden",
-    marginTop: 8,
-    fontSize: Typography.xs,
-    color: Colors.textPrimary,
-    fontFamily: Typography.fontMedium,
-    ...Shadow.card,
   },
-  miniFab: {
-    width: 52,
-    height: 52,
-    borderRadius: Radius.full,
-    alignItems: "center",
-    justifyContent: "center",
-    ...Shadow.elevated,
+  emptyActionText: {
+    fontSize: Typography.xs + 1,
+    fontFamily: Typography.fontBold,
+    color: "#FFFFFF",
   },
 });
 

@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  Screen: Wallet Management + Transfer
+//  Screen: Wallet Management
 // ─────────────────────────────────────────────
 import React, {useEffect, useState} from 'react';
 import {
@@ -18,9 +18,7 @@ import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import {RootStackParamList} from '../navigation/AppNavigator';
 import {Colors, Typography, Spacing, Radius, Shadow} from '../utils/theme';
 import {formatRupiah, formatInputAmount} from '../utils/currency';
-import {today} from '../utils/date';
 import {useWalletStore} from '../store/useWalletStore';
-import {createTransfer} from '../database/queries/transferQueries';
 import {Wallet} from '../types';
 
 const WALLET_COLORS = [
@@ -39,12 +37,6 @@ const WalletScreen: React.FC = () => {
   const [newBalance, setNewBalance] = useState('');
   const [newColor, setNewColor] = useState(WALLET_COLORS[0]);
 
-  // Transfer Modal
-  const [showTransferModal, setShowTransferModal] = useState(false);
-  const [fromWallet, setFromWallet] = useState<Wallet | null>(null);
-  const [toWallet, setToWallet] = useState<Wallet | null>(null);
-  const [transferAmount, setTransferAmount] = useState('');
-
   useEffect(() => {
     fetchWallets();
   }, []);
@@ -60,27 +52,6 @@ const WalletScreen: React.FC = () => {
     setNewBalance('');
     setNewColor(WALLET_COLORS[0]);
     setShowAddModal(false);
-  };
-
-  const handleTransfer = () => {
-    if (!fromWallet || !toWallet) {
-      Alert.alert('Pilih dompet', 'Pilih dompet asal dan tujuan.');
-      return;
-    }
-    if (fromWallet.id === toWallet.id) {
-      Alert.alert('Sama', 'Dompet asal dan tujuan tidak boleh sama.');
-      return;
-    }
-    const amount = parseFloat(transferAmount.replace(/\D/g, '') || '0');
-    if (amount <= 0) {
-      Alert.alert('Nominal', 'Masukkan nominal transfer.');
-      return;
-    }
-    createTransfer(fromWallet.id, toWallet.id, amount, today());
-    fetchWallets();
-    setShowTransferModal(false);
-    setTransferAmount('');
-    Alert.alert('Berhasil', `Transfer Rp ${formatRupiah(amount)} berhasil.`);
   };
 
   const handleDeleteWallet = (wallet: Wallet) => {
@@ -117,7 +88,7 @@ const WalletScreen: React.FC = () => {
             <Text style={styles.emptyEmoji}>👛</Text>
             <Text style={styles.emptyText}>Belum ada dompet</Text>
             <Text style={styles.emptySubtext}>
-              Ketuk "+ Tambah" untuk membuat dompet pertama
+              Ketuk "+ Dompet Baru" untuk membuat dompet pertama
             </Text>
           </View>
         ) : (
@@ -152,15 +123,6 @@ const WalletScreen: React.FC = () => {
             </View>
             <Text style={styles.actionBtnText}>Dompet Baru</Text>
           </TouchableOpacity>
-
-          {wallets.length >= 2 && (
-            <TouchableOpacity style={styles.actionBtn} onPress={() => setShowTransferModal(true)} activeOpacity={0.8}>
-              <View style={[styles.actionIconWrap, { backgroundColor: Colors.transfer + '15' }]}>
-                <Text style={{ fontSize: 20, color: Colors.transfer, fontWeight: 'bold' }}>⇄</Text>
-              </View>
-              <Text style={styles.actionBtnText}>Transfer</Text>
-            </TouchableOpacity>
-          )}
         </View>
       </ScrollView>
 
@@ -221,69 +183,6 @@ const WalletScreen: React.FC = () => {
                 style={styles.modalSave}
                 onPress={handleAddWallet}>
                 <Text style={styles.modalSaveText}>Simpan</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* ── Transfer Modal ── */}
-      <Modal
-        visible={showTransferModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowTransferModal(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Transfer Antar Dompet</Text>
-
-            <Text style={styles.inputLabel}>Dari Dompet</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{marginBottom: Spacing.sm}}>
-              {wallets.map(w => (
-                <TouchableOpacity
-                  key={w.id}
-                  style={[styles.chipBtn, fromWallet?.id === w.id && styles.chipBtnActive]}
-                  onPress={() => setFromWallet(w)}>
-                  <Text style={styles.chipBtnText}>{w.name}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-
-            <Text style={styles.inputLabel}>Ke Dompet</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{marginBottom: Spacing.sm}}>
-              {wallets.map(w => (
-                <TouchableOpacity
-                  key={w.id}
-                  style={[styles.chipBtn, toWallet?.id === w.id && styles.chipBtnActive]}
-                  onPress={() => setToWallet(w)}>
-                  <Text style={styles.chipBtnText}>{w.name}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-
-            <Text style={styles.inputLabel}>Nominal</Text>
-            <View style={styles.amountInputWrapper}>
-              <Text style={styles.rpPrefix}>Rp</Text>
-              <TextInput
-                style={styles.amountInput}
-                value={transferAmount}
-                onChangeText={(text) => setTransferAmount(formatInputAmount(text))}
-                placeholder="0"
-                placeholderTextColor={Colors.textTertiary}
-                keyboardType="numeric"
-              />
-            </View>
-
-            <View style={styles.modalActions}>
-              <TouchableOpacity
-                style={styles.modalCancel}
-                onPress={() => setShowTransferModal(false)}>
-                <Text style={styles.modalCancelText}>Batal</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalSave, {backgroundColor: Colors.transfer}]}
-                onPress={handleTransfer}>
-                <Text style={styles.modalSaveText}>Transfer</Text>
               </TouchableOpacity>
             </View>
           </View>
