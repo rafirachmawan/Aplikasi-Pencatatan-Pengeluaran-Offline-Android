@@ -53,11 +53,11 @@ const WalletCard: React.FC<WalletCardProps> = ({wallet, onPress, hidden}) => {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.bgCard,
-    borderRadius: Radius.lg,
+    borderRadius: Radius.xl,
     marginRight: Spacing.md,
     width: 165,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.borderLight,
     overflow: 'hidden',
     ...Shadow.card,
   },

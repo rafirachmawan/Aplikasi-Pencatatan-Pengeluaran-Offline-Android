@@ -44,13 +44,21 @@ export const updateWallet = (
   id: number,
   name: string,
   color_code: string,
+  initial_balance?: number,
 ): void => {
   const db = getDB();
-  db.execute(`UPDATE wallets SET name = ?, color_code = ? WHERE id = ?;`, [
-    name,
-    color_code,
-    id,
-  ]);
+  if (initial_balance !== undefined) {
+    db.execute(
+      `UPDATE wallets SET name = ?, color_code = ?, initial_balance = ? WHERE id = ?;`,
+      [name, color_code, initial_balance, id],
+    );
+  } else {
+    db.execute(`UPDATE wallets SET name = ?, color_code = ? WHERE id = ?;`, [
+      name,
+      color_code,
+      id,
+    ]);
+  }
 };
 
 export const softDeleteWallet = (id: number): void => {

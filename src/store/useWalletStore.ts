@@ -17,7 +17,7 @@ interface WalletState {
   isLoading: boolean;
   fetchWallets: () => void;
   addWallet: (name: string, initial_balance: number, color_code: string) => void;
-  editWallet: (id: number, name: string, color_code: string) => void;
+  editWallet: (id: number, name: string, color_code: string, initial_balance?: number) => void;
   removeWallet: (id: number) => void;
 }
 
@@ -44,8 +44,8 @@ export const useWalletStore = create<WalletState>(set => ({
     set({wallets, totalBalance});
   },
 
-  editWallet: (id, name, color_code) => {
-    updateWallet(id, name, color_code);
+  editWallet: (id, name, color_code, initial_balance) => {
+    updateWallet(id, name, color_code, initial_balance);
     const wallets = getAllWallets();
     const totalBalance = getTotalBalance();
     set({wallets, totalBalance});

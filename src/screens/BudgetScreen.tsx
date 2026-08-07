@@ -107,9 +107,15 @@ const BudgetScreen: React.FC = () => {
       confirmText: 'Ya, Hapus',
       cancelText: 'Batal',
       onConfirm: () => {
-        setSlots(prev => prev.filter((_, i) => i !== idx));
+        const updated = slots.filter((_, i) => i !== idx);
+        setSlots(updated);
         if (editingIdx === idx) setEditingIdx(null);
         if (activeEmojiPickerIdx === idx) setActiveEmojiPickerIdx(null);
+
+        // Langsung simpan perubahan penghapusan ke database SQLite
+        const dummyWalletId = wallets.length > 0 ? wallets[0].id! : 0;
+        saveBudgetPlan(dummyWalletId, updated, selectedPeriod);
+
         closeModal();
       },
     });
@@ -121,23 +127,12 @@ const BudgetScreen: React.FC = () => {
 
   // ─── Save ─────────────────────────────────────
   const handleSave = useCallback(() => {
-    if (incomeNum <= 0) {
+    if (incomeNum <= 0 && slots.length > 0) {
       setModalConfig({
         visible: true,
         type: 'warning',
         title: 'Saldo Kosong',
         message: 'Total saldo saat ini 0. Tambahkan saldo dompet terlebih dahulu.',
-        confirmText: 'Mengerti',
-        onConfirm: closeModal,
-      });
-      return;
-    }
-    if (slots.length === 0) {
-      setModalConfig({
-        visible: true,
-        type: 'warning',
-        title: 'Belum Ada Pos',
-        message: 'Tambahkan minimal satu pos alokasi anggaran.',
         confirmText: 'Mengerti',
         onConfirm: closeModal,
       });

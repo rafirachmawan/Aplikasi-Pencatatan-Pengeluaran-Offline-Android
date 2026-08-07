@@ -63,6 +63,8 @@ export const saveBudgetPlan = (
   );
   db.runSync(`DELETE FROM budget_plans WHERE period_month = ?;`, [period]);
 
+  if (slots.length === 0) return;
+
   const result = db.runSync(
     `INSERT INTO budget_plans (wallet_id, period_month, updated_at) VALUES (?, ?, date('now'));`,
     [walletId, period]

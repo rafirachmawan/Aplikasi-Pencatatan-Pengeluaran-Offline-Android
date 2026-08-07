@@ -156,35 +156,44 @@ const DashboardScreen: React.FC = () => {
           </Text>
         </View>
 
-        {/* ── Budget & Dana Banner ── */}
-        <TouchableOpacity
-          style={styles.budgetBanner}
-          activeOpacity={0.8}
-          onPress={() => navigation.navigate("Budget")}
-        >
-          <View style={styles.budgetBannerLeft}>
-            <View style={styles.budgetEmojiBadge}>
-              <Text style={styles.budgetBannerEmoji}>🪙</Text>
+        {/* ── Quick Actions Row ── */}
+        <View style={styles.quickActionsRow}>
+          <TouchableOpacity
+            style={styles.quickActionCard}
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate("Budget")}
+          >
+            <View style={styles.quickActionIconBadge}>
+              <Text style={styles.quickActionEmoji}>🪙</Text>
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.budgetBannerTitle}>Alokasi Dana</Text>
-              <Text style={styles.budgetBannerDesc}>
-                Atur alokasi gaji & anggaran bulanan
-              </Text>
+            <Text style={styles.quickActionTitle}>Atur Alokasi</Text>
+            <Text style={styles.quickActionDesc}>Atur pos anggaran</Text>
+            <View style={styles.quickActionArrow}>
+              <Text style={styles.quickActionArrowText}>→</Text>
             </View>
-          </View>
-          <View style={styles.budgetArrowBadge}>
-            <Text style={styles.budgetBannerArrow}>→</Text>
-          </View>
-        </TouchableOpacity>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.quickActionCard}
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate("Wallet")}
+          >
+            <View style={styles.quickActionIconBadge}>
+              <Text style={styles.quickActionEmoji}>💳</Text>
+            </View>
+            <Text style={styles.quickActionTitle}>Kelola Pemasukan</Text>
+            <Text style={styles.quickActionDesc}>Kelola sumber pemasukan</Text>
+            <View style={styles.quickActionArrow}>
+              <Text style={styles.quickActionArrowText}>→</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
 
         {/* ── Wallets Horizontal Scroll ── */}
         {wallets.length > 0 && (
           <View style={styles.section}>
             <SectionHeader
-              title="Dompet Saya"
-              onAction={() => navigation.navigate("Wallet")}
-              actionLabel="Kelola"
+              title="Pemasukan Saya"
             />
             <ScrollView
               horizontal
@@ -244,63 +253,62 @@ const DashboardScreen: React.FC = () => {
 
         {/* ── Monthly Budget Allocations (Alokasi Bulan Ini) ── */}
         <View style={[styles.section, { marginBottom: Spacing.xl }]}>
-          <SectionHeader
-            title="Alokasi Bulan Ini"
-            onAction={() => navigation.navigate("Budget")}
-            actionLabel="Atur Alokasi"
-          />
+          <SectionHeader title="Alokasi Bulan Ini" />
           {budgetSlots.length === 0 ? (
-            <View style={styles.emptyState}>
+            <TouchableOpacity
+              style={styles.emptyState}
+              activeOpacity={0.8}
+              onPress={() => navigation.navigate("Budget")}
+            >
               <Text style={styles.emptyEmoji}>🪙</Text>
               <Text style={styles.emptyText}>Belum Ada Alokasi Bulan Ini</Text>
               <Text style={styles.emptySubtext}>
-                Ketuk "Atur Alokasi" untuk membagi anggaran & pos pengeluaran bulanan
+                Gunakan menu Atur Alokasi di atas untuk membagi pos anggaran bulanan.
               </Text>
-              <TouchableOpacity
-                style={styles.emptyActionBtn}
-                onPress={() => navigation.navigate("Budget")}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.emptyActionText}>+ Atur Alokasi</Text>
-              </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
           ) : (
-            budgetSlots.map((slot, idx) => {
-              const barPct = totalBalance > 0 ? Math.min((slot.amount / totalBalance) * 100, 100) : 0;
-              return (
-                <TouchableOpacity
-                  key={idx}
-                  style={[styles.allocationCard, { borderLeftColor: slot.color }]}
-                  activeOpacity={0.85}
-                  onPress={() => navigation.navigate("Budget")}
-                >
-                  <View style={styles.allocationEmojiBadge}>
+            <TouchableOpacity
+              style={styles.allocationContainerCard}
+              activeOpacity={0.9}
+              onPress={() => navigation.navigate("Budget")}
+            >
+              {budgetSlots.map((slot, idx) => {
+                const barPct = totalBalance > 0 ? Math.min((slot.amount / totalBalance) * 100, 100) : 0;
+                const isLast = idx === budgetSlots.length - 1;
+                return (
+                  <View
+                    key={idx}
+                    style={[
+                      styles.allocationItemRow,
+                      !isLast && styles.allocationItemBorder,
+                    ]}
+                  >
                     <Text style={styles.allocationEmoji}>{slot.emoji || "📦"}</Text>
-                  </View>
-                  <View style={styles.allocationInfo}>
-                    <View style={styles.allocationTitleRow}>
-                      <Text style={styles.allocationName} numberOfLines={1}>
-                        {slot.name}
-                      </Text>
-                      <Text style={[styles.allocationAmount, { color: slot.color }]}>
-                        {balanceHidden ? "• • • • • •" : formatRupiah(slot.amount)}
-                      </Text>
+                    <View style={styles.allocationInfo}>
+                      <View style={styles.allocationTitleRow}>
+                        <Text style={styles.allocationName} numberOfLines={1}>
+                          {slot.name}
+                        </Text>
+                        <Text style={[styles.allocationAmount, { color: slot.color }]}>
+                          {balanceHidden ? "• • • • • •" : formatRupiah(slot.amount)}
+                        </Text>
+                      </View>
+                      <View style={styles.allocationBarBg}>
+                        <View
+                          style={[
+                            styles.allocationBarFill,
+                            {
+                              width: `${barPct}%` as any,
+                              backgroundColor: slot.color,
+                            },
+                          ]}
+                        />
+                      </View>
                     </View>
-                    <View style={styles.allocationBarBg}>
-                      <View
-                        style={[
-                          styles.allocationBarFill,
-                          {
-                            width: `${barPct}%` as any,
-                            backgroundColor: slot.color,
-                          },
-                        ]}
-                      />
-                    </View>
                   </View>
-                </TouchableOpacity>
-              );
-            })
+                );
+              })}
+            </TouchableOpacity>
           )}
         </View>
       </ScrollView>
@@ -317,8 +325,14 @@ const SectionHeader: React.FC<{
   <View style={styles.sectionHeader}>
     <Text style={styles.sectionTitle}>{title}</Text>
     {onAction && (
-      <TouchableOpacity onPress={onAction} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+      <TouchableOpacity
+        onPress={onAction}
+        style={styles.sectionActionPill}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        activeOpacity={0.7}
+      >
         <Text style={styles.sectionAction}>{actionLabel}</Text>
+        <Text style={styles.sectionActionArrow}>›</Text>
       </TouchableOpacity>
     )}
   </View>
@@ -440,57 +454,57 @@ const styles = StyleSheet.create({
     letterSpacing: -1,
   },
 
-  // Budget Banner
-  budgetBanner: {
+  // Quick Actions Row
+  quickActionsRow: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: Colors.bgCard,
-    borderRadius: Radius.lg,
-    padding: Spacing.md + 2,
+    gap: Spacing.sm + 2,
     marginBottom: Spacing.lg,
+  },
+  quickActionCard: {
+    flex: 1,
+    backgroundColor: Colors.bgCard,
+    borderRadius: Radius.xl,
+    padding: Spacing.md,
     borderWidth: 1,
     borderColor: Colors.borderLight,
+    alignItems: "center",
+    gap: 6,
     ...Shadow.card,
   },
-  budgetBannerLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.md,
-    flex: 1,
-  },
-  budgetEmojiBadge: {
-    width: 40,
-    height: 40,
-    borderRadius: Radius.md,
+  quickActionIconBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: Radius.lg,
     backgroundColor: Colors.bgInput,
     alignItems: "center",
     justifyContent: "center",
-  },
-  budgetBannerEmoji: {
-    fontSize: 20,
-  },
-  budgetBannerTitle: {
-    fontSize: Typography.base,
-    fontFamily: Typography.fontSemiBold,
-    color: Colors.textPrimary,
     marginBottom: 2,
   },
-  budgetBannerDesc: {
-    fontSize: Typography.xs,
+  quickActionEmoji: {
+    fontSize: 22,
+  },
+  quickActionTitle: {
+    fontSize: Typography.sm,
+    fontFamily: Typography.fontExtraBold,
+    color: Colors.textPrimary,
+    textAlign: "center",
+  },
+  quickActionDesc: {
+    fontSize: Typography.xs - 1,
     fontFamily: Typography.fontRegular,
     color: Colors.textSecondary,
+    textAlign: "center",
+    marginBottom: 4,
   },
-  budgetArrowBadge: {
+  quickActionArrow: {
     width: 28,
     height: 28,
     borderRadius: Radius.full,
     backgroundColor: Colors.bgInput,
     alignItems: "center",
     justifyContent: "center",
-    marginLeft: Spacing.sm,
   },
-  budgetBannerArrow: {
+  quickActionArrowText: {
     fontSize: Typography.sm,
     fontFamily: Typography.fontBold,
     color: Colors.textPrimary,
@@ -518,8 +532,22 @@ const styles = StyleSheet.create({
     fontFamily: Typography.fontSemiBold,
     letterSpacing: -0.2,
   },
+  sectionActionPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.primary + '12',
+    paddingHorizontal: Spacing.sm + 2,
+    paddingVertical: 4,
+    borderRadius: Radius.full,
+    gap: 2,
+  },
   sectionAction: {
-    fontSize: Typography.xs + 1,
+    fontSize: Typography.xs,
+    color: Colors.primary,
+    fontFamily: Typography.fontBold,
+  },
+  sectionActionArrow: {
+    fontSize: Typography.sm + 2,
     color: Colors.primary,
     fontFamily: Typography.fontBold,
   },
@@ -569,34 +597,33 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // Allocation cards
-  allocationCard: {
-    flexDirection: "row",
-    alignItems: "center",
+  // Allocation cards container
+  allocationContainerCard: {
     backgroundColor: Colors.bgCard,
-    borderRadius: Radius.lg,
+    borderRadius: Radius.xl,
     padding: Spacing.md,
-    marginBottom: Spacing.xs + 2,
-    borderLeftWidth: 4,
     borderWidth: 1,
     borderColor: Colors.borderLight,
-    gap: Spacing.md,
-    ...Shadow.soft,
+    ...Shadow.card,
   },
-  allocationEmojiBadge: {
-    width: 38,
-    height: 38,
-    borderRadius: Radius.md,
-    backgroundColor: Colors.bgInput,
+  allocationItemRow: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    paddingVertical: Spacing.xs + 4,
+    gap: Spacing.sm + 2,
+  },
+  allocationItemBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
   },
   allocationEmoji: {
-    fontSize: 18,
+    fontSize: 20,
+    width: 24,
+    textAlign: "center",
   },
   allocationInfo: {
     flex: 1,
-    gap: 6,
+    gap: 4,
   },
   allocationTitleRow: {
     flexDirection: "row",
@@ -604,18 +631,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   allocationName: {
-    fontSize: Typography.sm + 1,
+    fontSize: Typography.sm,
     fontFamily: Typography.fontSemiBold,
     color: Colors.textPrimary,
     flex: 1,
     marginRight: Spacing.xs,
   },
   allocationAmount: {
-    fontSize: Typography.sm + 1,
+    fontSize: Typography.sm,
     fontFamily: Typography.fontExtraBold,
   },
   allocationBarBg: {
-    height: 6,
+    height: 5,
     backgroundColor: Colors.bgInput,
     borderRadius: Radius.full,
     overflow: "hidden",
@@ -628,38 +655,27 @@ const styles = StyleSheet.create({
   // Empty state
   emptyState: {
     alignItems: "center",
-    paddingVertical: Spacing["2xl"],
+    paddingVertical: Spacing.xl,
     paddingHorizontal: Spacing.lg,
     backgroundColor: Colors.bgCard,
-    borderRadius: Radius.lg,
+    borderRadius: Radius.xl,
     borderWidth: 1,
     borderColor: Colors.borderLight,
     ...Shadow.card,
   },
-  emptyEmoji: { fontSize: 36, marginBottom: Spacing.sm },
+  emptyEmoji: { fontSize: 32, marginBottom: Spacing.xs },
   emptyText: {
-    fontSize: Typography.base,
+    fontSize: Typography.sm + 1,
     color: Colors.textPrimary,
-    fontFamily: Typography.fontSemiBold,
-    marginBottom: Spacing.xs,
+    fontFamily: Typography.fontBold,
+    marginBottom: 2,
   },
   emptySubtext: {
     fontSize: Typography.xs,
     color: Colors.textSecondary,
     fontFamily: Typography.fontRegular,
     textAlign: "center",
-    marginBottom: Spacing.md,
-  },
-  emptyActionBtn: {
-    backgroundColor: Colors.primary,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.xs + 2,
-    borderRadius: Radius.full,
-  },
-  emptyActionText: {
-    fontSize: Typography.xs + 1,
-    fontFamily: Typography.fontBold,
-    color: "#FFFFFF",
+    lineHeight: 18,
   },
 });
 
