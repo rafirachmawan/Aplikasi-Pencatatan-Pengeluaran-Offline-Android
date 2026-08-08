@@ -285,15 +285,17 @@ const BudgetScreen: React.FC = () => {
             <View style={styles.cardHeaderRow}>
               <Text style={styles.cardTitle}>📊 Pos Alokasi Dana</Text>
               <View style={styles.cardHeaderActions}>
-                <TouchableOpacity onPress={addSlot} style={styles.addPosBtnSmall} activeOpacity={0.8}>
-                  <Text style={styles.addPosBtnSmallText}>+ Tambah</Text>
+                <TouchableOpacity onPress={addSlot} style={styles.addPosBtnSmall} activeOpacity={0.75}>
+                  <Text style={styles.addPosIcon}>＋</Text>
+                  <Text style={styles.addPosBtnSmallText}>Tambah</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={handleSave}
                   style={[styles.saveBtnSmall, saving && { opacity: 0.6 }]}
-                  activeOpacity={0.8}
+                  activeOpacity={0.75}
                   disabled={saving}>
-                  <Text style={styles.saveBtnSmallText}>{saving ? '...' : '💾 Simpan'}</Text>
+                  <Text style={styles.saveIcon}>💾</Text>
+                  <Text style={styles.saveBtnSmallText}>{saving ? '...' : 'Simpan'}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -512,17 +514,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm + 4,
+    paddingVertical: Spacing.sm + 2,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.borderLight,
     backgroundColor: Colors.bgCard,
   },
-  backBtn: { padding: Spacing.xs },
-  backIcon: { fontSize: 22, color: Colors.textPrimary, fontWeight: '700' },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.bgInput,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backIcon: {
+    fontSize: 18,
+    color: Colors.textPrimary,
+    fontFamily: Typography.fontBold,
+    marginTop: -2,
+  },
   headerTitle: {
     fontSize: Typography.base + 1,
     fontFamily: Typography.fontExtraBold,
     color: Colors.textPrimary,
+    letterSpacing: -0.3,
   },
 
   scroll: { paddingHorizontal: Spacing.lg, paddingTop: Spacing.md },
@@ -682,29 +699,45 @@ const styles = StyleSheet.create({
   cardHeaderActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   addPosBtnSmall: {
-    backgroundColor: Colors.primary,
-    paddingHorizontal: Spacing.sm + 2,
-    paddingVertical: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: Colors.bgInput,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: Radius.full,
     ...Shadow.soft,
+  },
+  addPosIcon: {
+    fontSize: 14,
+    color: Colors.primary,
+    fontFamily: Typography.fontExtraBold,
   },
   addPosBtnSmallText: {
-    fontSize: Typography.xs,
+    fontSize: Typography.xs + 1,
     fontFamily: Typography.fontBold,
-    color: '#FFFFFF',
+    color: Colors.textPrimary,
   },
   saveBtnSmall: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
     backgroundColor: Colors.income,
-    paddingHorizontal: Spacing.sm + 2,
-    paddingVertical: 5,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
     borderRadius: Radius.full,
     ...Shadow.soft,
   },
+  saveIcon: {
+    fontSize: 13,
+  },
   saveBtnSmallText: {
-    fontSize: Typography.xs,
+    fontSize: Typography.xs + 1,
     fontFamily: Typography.fontExtraBold,
     color: '#FFFFFF',
   },

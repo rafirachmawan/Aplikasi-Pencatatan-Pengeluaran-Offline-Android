@@ -60,6 +60,20 @@ const DashboardScreen: React.FC = () => {
     }));
   }, [selectedMonth]);
 
+  // Allocation Breakdown Calculations
+  const totalAllocated = useMemo(() => {
+    return budgetSlots.reduce((sum, slot) => sum + (slot.amount || 0), 0);
+  }, [budgetSlots]);
+
+  const unallocatedBalance = useMemo(() => {
+    return Math.max(0, totalBalance - totalAllocated);
+  }, [totalBalance, totalAllocated]);
+
+  const allocatedPercentage = useMemo(() => {
+    if (totalBalance <= 0) return 0;
+    return Math.min(100, Math.round((totalAllocated / totalBalance) * 100));
+  }, [totalBalance, totalAllocated]);
+
   // Live clock
   const [currentTime, setCurrentTime] = useState(() => {
     const now = new Date();
@@ -111,32 +125,45 @@ const DashboardScreen: React.FC = () => {
       >
         {/* Header */}
         <View style={styles.header}>
-          {/* Row 1: Branding kiri + Chip jam/hari kanan */}
+          {/* Row 1: Branding Kiri + Chip Waktu Kanan */}
           <View style={styles.headerTopRow}>
             <View style={styles.brandRow}>
-              <Image
-                source={require("../../assets/Finanku.png")}
-                style={styles.brandImage}
-                resizeMode="contain"
-              />
-              <Text style={styles.brandName}>FinanceKu</Text>
+              <View style={styles.logoBadgeContainer}>
+                <Image
+                  source={require("../../assets/Finanku.png")}
+                  style={styles.brandImage}
+                  resizeMode="contain"
+                />
+              </View>
+              <View style={styles.brandTextGroup}>
+                <Text style={styles.brandName}>FinanceKu</Text>
+                <Text style={styles.brandSubText}>Financial Tracker</Text>
+              </View>
             </View>
 
             <View style={styles.dateTimeChip}>
+              <View style={styles.pulseDot} />
               <Text style={styles.clockText}>{currentTime}</Text>
               <View style={styles.chipDivider} />
               <Text style={styles.datePillText}>{dayName}</Text>
             </View>
           </View>
 
-          {/* Row 2: Slogan */}
-          <Text style={styles.slogan} numberOfLines={1} adjustsFontSizeToFit>
-            Catat. Kelola. <Text style={styles.sloganAccent}>Bertumbuh.</Text>
-          </Text>
+          {/* Row 2: Slogan Banner */}
+          <View style={styles.sloganCard}>
+            <Text style={styles.slogan} numberOfLines={1} adjustsFontSizeToFit>
+              Catat. Kelola. <Text style={styles.sloganAccent}>Bertumbuh.</Text>
+            </Text>
+          </View>
         </View>
 
-        {/* ── Hero Balance Card (Dark Slate Accent) ── */}
+        {/* ── Hero Balance Card (Dark Slate Accent with Mesh Orbs) ── */}
         <View style={styles.heroCard}>
+          {/* Decorative Ambient Background Orbs */}
+          <View style={styles.heroOrb1} pointerEvents="none" />
+          <View style={styles.heroOrb2} pointerEvents="none" />
+          <View style={styles.heroOrb3} pointerEvents="none" />
+
           <View style={styles.heroTopRow}>
             <View style={styles.heroLabelBadge}>
               <Text style={styles.heroLabelDot}>●</Text>
@@ -154,37 +181,86 @@ const DashboardScreen: React.FC = () => {
           <Text style={styles.heroBalanceAmount}>
             {balanceHidden ? "• • • • • •" : formatRupiah(totalBalance)}
           </Text>
+
+          {/* Allocation Breakdown inside Hero Card */}
+          <View style={styles.heroAllocationBreakdown}>
+            <View style={styles.heroAllocationBarBg}>
+              <View
+                style={[
+                  styles.heroAllocationBarFill,
+                  { width: `${allocatedPercentage}%` },
+                ]}
+              />
+            </View>
+
+            <View style={styles.heroBreakdownRow}>
+              <View style={styles.heroBreakdownCol}>
+                <View style={styles.heroBreakdownDotLabel}>
+                  <View style={[styles.dotIndicator, { backgroundColor: Colors.income }]} />
+                  <Text style={styles.heroBreakdownLabel}>Terdialokasikan</Text>
+                </View>
+                <Text style={styles.heroBreakdownValue}>
+                  {balanceHidden ? "••••••" : formatRupiah(totalAllocated)} ({allocatedPercentage}%)
+                </Text>
+              </View>
+
+              <View style={styles.heroBreakdownDivider} />
+
+              <View style={styles.heroBreakdownCol}>
+                <View style={styles.heroBreakdownDotLabel}>
+                  <View style={[styles.dotIndicator, { backgroundColor: '#60A5FA' }]} />
+                  <Text style={styles.heroBreakdownLabel}>Belum Dialokasi</Text>
+                </View>
+                <Text style={styles.heroBreakdownValue}>
+                  {balanceHidden ? "••••••" : formatRupiah(unallocatedBalance)}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.heroFooterRow}>
+            <View style={styles.heroChipDecoration}>
+              <View style={styles.heroChipLine} />
+              <Text style={styles.heroChipText}>FinanceKu Card</Text>
+            </View>
+          </View>
         </View>
 
         {/* ── Quick Actions Row ── */}
         <View style={styles.quickActionsRow}>
           <TouchableOpacity
             style={styles.quickActionCard}
-            activeOpacity={0.8}
+            activeOpacity={0.82}
             onPress={() => navigation.navigate("Budget")}
           >
-            <View style={styles.quickActionIconBadge}>
-              <Text style={styles.quickActionEmoji}>🪙</Text>
-            </View>
-            <Text style={styles.quickActionTitle}>Atur Alokasi</Text>
-            <Text style={styles.quickActionDesc}>Atur pos anggaran</Text>
-            <View style={styles.quickActionArrow}>
-              <Text style={styles.quickActionArrowText}>→</Text>
+            <View style={[styles.quickActionAccentStrip, { backgroundColor: '#F59E0B' }]} />
+            <View style={styles.quickActionContent}>
+              <View style={[styles.quickActionIconBadge, { backgroundColor: '#FFFBEB', borderColor: '#FDE68A' }]}>
+                <Text style={styles.quickActionEmoji}>🪙</Text>
+              </View>
+              <Text style={styles.quickActionTitle}>Atur Alokasi</Text>
+              <Text style={styles.quickActionDesc}>Atur pos anggaran</Text>
+              <View style={styles.quickActionArrow}>
+                <Text style={styles.quickActionArrowText}>→</Text>
+              </View>
             </View>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.quickActionCard}
-            activeOpacity={0.8}
+            activeOpacity={0.82}
             onPress={() => navigation.navigate("Wallet")}
           >
-            <View style={styles.quickActionIconBadge}>
-              <Text style={styles.quickActionEmoji}>💳</Text>
-            </View>
-            <Text style={styles.quickActionTitle}>Kelola Pemasukan</Text>
-            <Text style={styles.quickActionDesc}>Kelola sumber pemasukan</Text>
-            <View style={styles.quickActionArrow}>
-              <Text style={styles.quickActionArrowText}>→</Text>
+            <View style={[styles.quickActionAccentStrip, { backgroundColor: '#10B981' }]} />
+            <View style={styles.quickActionContent}>
+              <View style={[styles.quickActionIconBadge, { backgroundColor: '#ECFDF5', borderColor: '#A7F3D0' }]}>
+                <Text style={styles.quickActionEmoji}>💳</Text>
+              </View>
+              <Text style={styles.quickActionTitle}>Kelola Pemasukan</Text>
+              <Text style={styles.quickActionDesc}>Kelola sumber pemasukan</Text>
+              <View style={styles.quickActionArrow}>
+                <Text style={styles.quickActionArrowText}>→</Text>
+              </View>
             </View>
           </TouchableOpacity>
         </View>
@@ -272,6 +348,22 @@ const DashboardScreen: React.FC = () => {
               activeOpacity={0.9}
               onPress={() => navigation.navigate("Budget")}
             >
+              {/* Summary Header Banner */}
+              <View style={styles.allocationSummaryBanner}>
+                <View style={styles.allocationSummaryCol}>
+                  <Text style={styles.allocationSummaryLabel}>Total Alokasi</Text>
+                  <Text style={styles.allocationSummaryValue}>
+                    {balanceHidden ? "••••••" : formatRupiah(totalAllocated)}
+                  </Text>
+                </View>
+                <View style={styles.allocationSummaryPill}>
+                  <Text style={styles.allocationSummaryPillLabel}>Sisa Belum Dialokasi:</Text>
+                  <Text style={styles.allocationSummaryPillValue}>
+                    {balanceHidden ? "••••••" : formatRupiah(unallocatedBalance)}
+                  </Text>
+                </View>
+              </View>
+
               {budgetSlots.map((slot, idx) => {
                 const barPct = totalBalance > 0 ? Math.min((slot.amount / totalBalance) * 100, 100) : 0;
                 const isLast = idx === budgetSlots.length - 1;
@@ -283,13 +375,15 @@ const DashboardScreen: React.FC = () => {
                       !isLast && styles.allocationItemBorder,
                     ]}
                   >
-                    <Text style={styles.allocationEmoji}>{slot.emoji || "📦"}</Text>
+                    <View style={[styles.allocationEmojiWrapper, { backgroundColor: (slot.color || Colors.primary) + '15' }]}>
+                      <Text style={styles.allocationEmoji}>{slot.emoji || "📦"}</Text>
+                    </View>
                     <View style={styles.allocationInfo}>
                       <View style={styles.allocationTitleRow}>
                         <Text style={styles.allocationName} numberOfLines={1}>
                           {slot.name}
                         </Text>
-                        <Text style={[styles.allocationAmount, { color: slot.color }]}>
+                        <Text style={[styles.allocationAmount, { color: slot.color || Colors.textPrimary }]}>
                           {balanceHidden ? "• • • • • •" : formatRupiah(slot.amount)}
                         </Text>
                       </View>
@@ -299,7 +393,7 @@ const DashboardScreen: React.FC = () => {
                             styles.allocationBarFill,
                             {
                               width: `${barPct}%` as any,
-                              backgroundColor: slot.color,
+                              backgroundColor: slot.color || Colors.primary,
                             },
                           ]}
                         />
@@ -344,8 +438,8 @@ const styles = StyleSheet.create({
 
   // Header
   header: {
-    marginBottom: Spacing.lg,
-    gap: Spacing.md,
+    marginBottom: Spacing.md + 4,
+    gap: Spacing.sm + 2,
   },
   headerTopRow: {
     flexDirection: "row",
@@ -355,26 +449,56 @@ const styles = StyleSheet.create({
   brandRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: Spacing.xs,
+    gap: Spacing.sm - 2,
+  },
+  logoBadgeContainer: {
+    width: 46,
+    height: 46,
+    borderRadius: Radius.lg - 2,
+    backgroundColor: Colors.bgCard,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+    ...Shadow.soft,
   },
   brandImage: {
-    width: 38,
-    height: 38,
-    transform: [{ scale: 3.8 }],
-    marginLeft: Spacing.xs,
-    marginRight: Spacing.xs,
+    width: 42,
+    height: 42,
+    transform: [{ scale: 1.8 }],
+  },
+  brandTextGroup: {
+    justifyContent: "center",
   },
   brandName: {
-    fontSize: Typography.lg,
+    fontSize: Typography.base + 2,
     fontFamily: Typography.fontExtraBold,
     color: Colors.textPrimary,
-    letterSpacing: -0.5,
+    letterSpacing: -0.4,
+    lineHeight: 20,
+  },
+  brandSubText: {
+    fontSize: Typography.xs - 2,
+    fontFamily: Typography.fontMedium,
+    color: Colors.textSecondary,
+    letterSpacing: 0.2,
+  },
+  sloganCard: {
+    backgroundColor: Colors.bgCard,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    borderRadius: Radius.lg,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs + 2,
+    alignSelf: "flex-start",
+    ...Shadow.soft,
   },
   slogan: {
-    fontSize: Typography.lg + 2,
+    fontSize: Typography.sm + 1,
     fontFamily: Typography.fontSemiBold,
     color: Colors.textPrimary,
-    letterSpacing: -0.3,
+    letterSpacing: -0.2,
   },
   sloganAccent: {
     color: Colors.primary,
@@ -385,21 +509,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: Colors.bgCard,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.borderLight,
     borderRadius: Radius.full,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
     gap: 6,
     ...Shadow.soft,
+  },
+  pulseDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.income,
   },
   chipDivider: {
     width: 1,
     height: 10,
-    backgroundColor: Colors.textDisabled,
+    backgroundColor: Colors.border,
   },
   clockText: {
     fontSize: Typography.xs,
-    fontFamily: Typography.fontSemiBold,
+    fontFamily: Typography.fontBold,
     color: Colors.textPrimary,
   },
   datePillText: {
@@ -408,27 +538,63 @@ const styles = StyleSheet.create({
     fontFamily: Typography.fontMedium,
   },
 
-  // Hero Card (Dark Slate Accent)
+  // Hero Card (Dark Slate Accent with Mesh Orbs)
   heroCard: {
     backgroundColor: Colors.heroBg,
-    borderRadius: Radius.xl,
+    borderRadius: Radius["2xl"],
     paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.lg + 2,
+    paddingTop: Spacing.lg,
+    paddingBottom: Spacing.md + 2,
     marginBottom: Spacing.lg,
     borderWidth: 1,
-    borderColor: Colors.heroBorder,
+    borderColor: "rgba(255, 255, 255, 0.12)",
+    position: "relative",
+    overflow: "hidden",
     ...Shadow.hero,
+  },
+  heroOrb1: {
+    position: "absolute",
+    right: -25,
+    top: -25,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+  },
+  heroOrb2: {
+    position: "absolute",
+    right: 40,
+    bottom: -45,
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    backgroundColor: "rgba(59, 130, 246, 0.14)",
+  },
+  heroOrb3: {
+    position: "absolute",
+    left: -35,
+    bottom: -35,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: "rgba(16, 185, 129, 0.08)",
   },
   heroTopRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: Spacing.xs,
+    marginBottom: Spacing.xs + 2,
   },
   heroLabelBadge: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.15)",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: Radius.full,
   },
   heroLabelDot: {
     fontSize: 8,
@@ -436,22 +602,108 @@ const styles = StyleSheet.create({
   },
   heroLabelText: {
     fontSize: Typography.xs,
-    color: Colors.heroTextSecondary,
+    color: Colors.heroTextPrimary,
     fontFamily: Typography.fontMedium,
   },
   eyeBtn: {
-    padding: 4,
+    width: 32,
+    height: 32,
+    borderRadius: Radius.full,
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.18)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   eyeIcon: {
-    fontSize: 16,
+    fontSize: 15,
   },
   heroBalanceAmount: {
     fontSize: Typography["3xl"] + 2,
     color: Colors.heroTextPrimary,
     fontFamily: Typography.fontExtraBold,
     marginTop: Spacing.xs,
-    marginBottom: Spacing.xs / 2,
+    marginBottom: Spacing.sm,
     letterSpacing: -1,
+  },
+  heroAllocationBreakdown: {
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.12)",
+    borderRadius: Radius.lg,
+    padding: Spacing.sm + 2,
+    marginVertical: Spacing.xs,
+    gap: Spacing.xs + 2,
+  },
+  heroAllocationBarBg: {
+    height: 6,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    borderRadius: Radius.full,
+    overflow: "hidden",
+  },
+  heroAllocationBarFill: {
+    height: "100%",
+    backgroundColor: Colors.income,
+    borderRadius: Radius.full,
+  },
+  heroBreakdownRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  heroBreakdownCol: {
+    flex: 1,
+    gap: 2,
+  },
+  heroBreakdownDotLabel: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  dotIndicator: {
+    width: 6,
+    height: 6,
+    borderRadius: Radius.full,
+  },
+  heroBreakdownLabel: {
+    fontSize: Typography.xs - 2,
+    color: "rgba(255, 255, 255, 0.7)",
+    fontFamily: Typography.fontMedium,
+  },
+  heroBreakdownValue: {
+    fontSize: Typography.xs,
+    color: Colors.heroTextPrimary,
+    fontFamily: Typography.fontExtraBold,
+  },
+  heroBreakdownDivider: {
+    width: 1,
+    height: 22,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    marginHorizontal: Spacing.xs,
+  },
+  heroFooterRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: Spacing.xs + 2,
+  },
+  heroChipDecoration: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  heroChipLine: {
+    width: 14,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+  },
+  heroChipText: {
+    fontSize: Typography.xs - 2,
+    color: "rgba(255, 255, 255, 0.4)",
+    fontFamily: Typography.fontSemiBold,
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
 
   // Quick Actions Row
@@ -464,18 +716,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.bgCard,
     borderRadius: Radius.xl,
-    padding: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.borderLight,
-    alignItems: "center",
-    gap: 6,
+    borderColor: Colors.border,
+    overflow: "hidden",
     ...Shadow.card,
   },
+  quickActionAccentStrip: {
+    height: 4,
+    width: "100%",
+  },
+  quickActionContent: {
+    padding: Spacing.md,
+    alignItems: "center",
+    gap: 6,
+  },
   quickActionIconBadge: {
-    width: 44,
-    height: 44,
-    borderRadius: Radius.lg,
-    backgroundColor: Colors.bgInput,
+    width: 46,
+    height: 46,
+    borderRadius: Radius.full,
+    borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 2,
@@ -559,7 +818,7 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: Colors.borderLight,
+    borderColor: Colors.border,
     ...Shadow.card,
   },
   chartCenter: {
@@ -603,8 +862,49 @@ const styles = StyleSheet.create({
     borderRadius: Radius.xl,
     padding: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.borderLight,
+    borderColor: Colors.border,
     ...Shadow.card,
+  },
+  allocationSummaryBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: Colors.bgInput,
+    paddingHorizontal: Spacing.sm + 4,
+    paddingVertical: Spacing.xs + 4,
+    borderRadius: Radius.lg,
+    marginBottom: Spacing.xs + 4,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+  },
+  allocationSummaryCol: {
+    gap: 2,
+  },
+  allocationSummaryLabel: {
+    fontSize: Typography.xs - 2,
+    color: Colors.textSecondary,
+    fontFamily: Typography.fontMedium,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  allocationSummaryValue: {
+    fontSize: Typography.sm,
+    fontFamily: Typography.fontExtraBold,
+    color: Colors.income,
+  },
+  allocationSummaryPill: {
+    alignItems: "flex-end",
+    gap: 2,
+  },
+  allocationSummaryPillLabel: {
+    fontSize: Typography.xs - 2,
+    color: Colors.textSecondary,
+    fontFamily: Typography.fontMedium,
+  },
+  allocationSummaryPillValue: {
+    fontSize: Typography.xs + 1,
+    fontFamily: Typography.fontBold,
+    color: Colors.primary,
   },
   allocationItemRow: {
     flexDirection: "row",
@@ -616,14 +916,20 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.borderLight,
   },
+  allocationEmojiWrapper: {
+    width: 36,
+    height: 36,
+    borderRadius: Radius.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   allocationEmoji: {
-    fontSize: 20,
-    width: 24,
+    fontSize: 18,
     textAlign: "center",
   },
   allocationInfo: {
     flex: 1,
-    gap: 4,
+    gap: 6,
   },
   allocationTitleRow: {
     flexDirection: "row",
@@ -642,7 +948,7 @@ const styles = StyleSheet.create({
     fontFamily: Typography.fontExtraBold,
   },
   allocationBarBg: {
-    height: 5,
+    height: 6,
     backgroundColor: Colors.bgInput,
     borderRadius: Radius.full,
     overflow: "hidden",
@@ -660,7 +966,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.bgCard,
     borderRadius: Radius.xl,
     borderWidth: 1,
-    borderColor: Colors.borderLight,
+    borderColor: Colors.border,
     ...Shadow.card,
   },
   emptyEmoji: { fontSize: 32, marginBottom: Spacing.xs },
