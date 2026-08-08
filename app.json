@@ -1,18 +1,19 @@
 {
   "expo": {
-    "name": "ExpoPencatatan",
+    "name": "FinanceKU",
     "slug": "ExpoPencatatan",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/Finanku.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true
     },
     "android": {
+      "package": "com.rafirachmawan.expopencatatan",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
+        "foregroundImage": "./assets/Finanku.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
@@ -23,6 +24,11 @@
     },
     "plugins": [
       "expo-sqlite"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "0847d1d9-ca23-4253-9ff2-027005519aa8"
+      }
+    }
   }
 }
