@@ -119,7 +119,7 @@ const WalletScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.root}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.bg} />
+      <StatusBar barStyle="dark-content" backgroundColor={Colors.bg} />
 
       {/* Header Navbar */}
       <View style={styles.header}>
@@ -145,14 +145,14 @@ const WalletScreen: React.FC = () => {
               <View style={styles.walletInfo}>
                 <View style={[styles.colorDot, {backgroundColor: w.color_code ?? Colors.primary}]} />
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.walletName}>{w.name}</Text>
-                  <Text style={styles.walletSub}>
+                  <Text style={styles.walletName} numberOfLines={1}>{w.name}</Text>
+                  <Text style={styles.walletSub} numberOfLines={1}>
                     Saldo awal: {formatRupiah(w.initial_balance)}
                   </Text>
                 </View>
               </View>
               <View style={styles.walletRight}>
-                <Text style={styles.walletBalance}>
+                <Text style={styles.walletBalance} numberOfLines={1} adjustsFontSizeToFit>
                   {formatRupiah(w.current_balance ?? w.initial_balance)}
                 </Text>
                 <View style={styles.cardActionRow}>

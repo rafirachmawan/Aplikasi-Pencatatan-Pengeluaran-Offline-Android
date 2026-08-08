@@ -178,7 +178,7 @@ const DashboardScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.heroBalanceAmount}>
+          <Text style={styles.heroBalanceAmount} numberOfLines={1} adjustsFontSizeToFit>
             {balanceHidden ? "• • • • • •" : formatRupiah(totalBalance)}
           </Text>
 
@@ -197,9 +197,9 @@ const DashboardScreen: React.FC = () => {
               <View style={styles.heroBreakdownCol}>
                 <View style={styles.heroBreakdownDotLabel}>
                   <View style={[styles.dotIndicator, { backgroundColor: Colors.income }]} />
-                  <Text style={styles.heroBreakdownLabel}>Terdialokasikan</Text>
+                  <Text style={styles.heroBreakdownLabel} numberOfLines={1}>Terdialokasikan</Text>
                 </View>
-                <Text style={styles.heroBreakdownValue}>
+                <Text style={styles.heroBreakdownValue} numberOfLines={1} adjustsFontSizeToFit>
                   {balanceHidden ? "••••••" : formatRupiah(totalAllocated)} ({allocatedPercentage}%)
                 </Text>
               </View>
@@ -209,9 +209,9 @@ const DashboardScreen: React.FC = () => {
               <View style={styles.heroBreakdownCol}>
                 <View style={styles.heroBreakdownDotLabel}>
                   <View style={[styles.dotIndicator, { backgroundColor: '#60A5FA' }]} />
-                  <Text style={styles.heroBreakdownLabel}>Belum Dialokasi</Text>
+                  <Text style={styles.heroBreakdownLabel} numberOfLines={1}>Belum Dialokasi</Text>
                 </View>
-                <Text style={styles.heroBreakdownValue}>
+                <Text style={styles.heroBreakdownValue} numberOfLines={1} adjustsFontSizeToFit>
                   {balanceHidden ? "••••••" : formatRupiah(unallocatedBalance)}
                 </Text>
               </View>
@@ -238,8 +238,8 @@ const DashboardScreen: React.FC = () => {
               <View style={[styles.quickActionIconBadge, { backgroundColor: '#FFFBEB', borderColor: '#FDE68A' }]}>
                 <Text style={styles.quickActionEmoji}>🪙</Text>
               </View>
-              <Text style={styles.quickActionTitle}>Atur Alokasi</Text>
-              <Text style={styles.quickActionDesc}>Atur pos anggaran</Text>
+              <Text style={styles.quickActionTitle} numberOfLines={1}>Atur Alokasi</Text>
+              <Text style={styles.quickActionDesc} numberOfLines={1}>Atur pos anggaran</Text>
               <View style={styles.quickActionArrow}>
                 <Text style={styles.quickActionArrowText}>→</Text>
               </View>
@@ -256,8 +256,8 @@ const DashboardScreen: React.FC = () => {
               <View style={[styles.quickActionIconBadge, { backgroundColor: '#ECFDF5', borderColor: '#A7F3D0' }]}>
                 <Text style={styles.quickActionEmoji}>💳</Text>
               </View>
-              <Text style={styles.quickActionTitle}>Kelola Pemasukan</Text>
-              <Text style={styles.quickActionDesc}>Kelola sumber pemasukan</Text>
+              <Text style={styles.quickActionTitle} numberOfLines={1}>Kelola Pemasukan</Text>
+              <Text style={styles.quickActionDesc} numberOfLines={1}>Kelola sumber pemasukan</Text>
               <View style={styles.quickActionArrow}>
                 <Text style={styles.quickActionArrowText}>→</Text>
               </View>
@@ -351,14 +351,14 @@ const DashboardScreen: React.FC = () => {
               {/* Summary Header Banner */}
               <View style={styles.allocationSummaryBanner}>
                 <View style={styles.allocationSummaryCol}>
-                  <Text style={styles.allocationSummaryLabel}>Total Alokasi</Text>
-                  <Text style={styles.allocationSummaryValue}>
+                  <Text style={styles.allocationSummaryLabel} numberOfLines={1}>Total Alokasi</Text>
+                  <Text style={styles.allocationSummaryValue} numberOfLines={1} adjustsFontSizeToFit>
                     {balanceHidden ? "••••••" : formatRupiah(totalAllocated)}
                   </Text>
                 </View>
                 <View style={styles.allocationSummaryPill}>
-                  <Text style={styles.allocationSummaryPillLabel}>Sisa Belum Dialokasi:</Text>
-                  <Text style={styles.allocationSummaryPillValue}>
+                  <Text style={styles.allocationSummaryPillLabel} numberOfLines={1}>Sisa Belum Dialokasi:</Text>
+                  <Text style={styles.allocationSummaryPillValue} numberOfLines={1} adjustsFontSizeToFit>
                     {balanceHidden ? "••••••" : formatRupiah(unallocatedBalance)}
                   </Text>
                 </View>

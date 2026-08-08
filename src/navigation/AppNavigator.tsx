@@ -46,14 +46,24 @@ const AppNavigator: React.FC = () => {
             animation: 'slide_from_bottom',
           }}
         />
-        <Stack.Screen name="Wallet"      component={WalletScreen} />
+        <Stack.Screen
+          name="Wallet"
+          component={WalletScreen}
+          options={{
+            presentation: 'card',
+            animation: 'slide_from_right',
+          }}
+        />
         <Stack.Screen name="Report"      component={ReportScreen} />
         <Stack.Screen name="Category"    component={CategoryScreen} />
         <Stack.Screen name="TransactionDetail" component={TransactionDetailScreen} />
         <Stack.Screen
           name="Budget"
           component={BudgetScreen}
-          options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+          options={{
+            presentation: 'card',
+            animation: 'slide_from_right',
+          }}
         />
       </Stack.Navigator>
     </NavigationContainer>

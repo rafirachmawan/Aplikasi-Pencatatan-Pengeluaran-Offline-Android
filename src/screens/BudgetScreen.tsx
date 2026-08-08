@@ -217,9 +217,9 @@ const BudgetScreen: React.FC = () => {
           {/* ── Dark Hero Overview Card ── */}
           <View style={styles.heroOverviewCard}>
             <View style={styles.heroTopRow}>
-              <View>
-                <Text style={styles.heroLabel}>SUMBER DANA (TOTAL DOMPET)</Text>
-                <Text style={styles.heroAmount}>{formatRupiah(incomeNum)}</Text>
+              <View style={{ flex: 1, marginRight: Spacing.xs }}>
+                <Text style={styles.heroLabel} numberOfLines={1}>SUMBER DANA (TOTAL DOMPET)</Text>
+                <Text style={styles.heroAmount} numberOfLines={1} adjustsFontSizeToFit>{formatRupiah(incomeNum)}</Text>
               </View>
               <View style={styles.heroPctBadge}>
                 <Text style={styles.heroPctText}>
@@ -229,11 +229,15 @@ const BudgetScreen: React.FC = () => {
             </View>
 
             <View style={styles.heroProgressHeader}>
-              <Text style={styles.heroProgressLabel}>Total Dialokasikan</Text>
-              <Text style={[
-                styles.heroProgressAmount,
-                { color: totalAllocated > incomeNum ? '#F87171' : '#4ADE80' }
-              ]}>
+              <Text style={styles.heroProgressLabel} numberOfLines={1}>Total Dialokasikan</Text>
+              <Text
+                style={[
+                  styles.heroProgressAmount,
+                  { color: totalAllocated > incomeNum ? '#F87171' : '#4ADE80' }
+                ]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
                 {formatRupiah(totalAllocated)}
               </Text>
             </View>
